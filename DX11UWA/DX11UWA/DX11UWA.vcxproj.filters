@@ -52,6 +52,12 @@
       <Filter>Content</Filter>
     </ClCompile>
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="Content\My3DSceneRenderer.cpp">
+      <Filter>Content</Filter>
+    </ClCompile>
+    <ClCompile Include="Content\MyFpsTextRenderer.cpp">
+      <Filter>Content</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DX11UWAMain.h" />
@@ -78,6 +84,12 @@
       <Filter>Content</Filter>
     </ClInclude>
     <ClInclude Include="App.h" />
+    <ClInclude Include="Content\My3DSceneRenderer.h">
+      <Filter>Content</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\MyFpsTextRenderer.h">
+      <Filter>Content</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\StoreLogo.png">
