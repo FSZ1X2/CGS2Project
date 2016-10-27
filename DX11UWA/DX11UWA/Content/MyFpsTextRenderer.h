@@ -11,10 +11,10 @@ namespace DX11UWA
 	{
 	public:
 		MyFpsTextRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources);
-		void mCreateDeviceDependentResources();
-		void mReleaseDeviceDependentResources();
-		void mUpdate(DX::StepTimer const& timer);
-		void mRender();
+		void CreateDeviceDependentResources();
+		void ReleaseDeviceDependentResources();
+		void Update(DX::StepTimer const& timer);
+		void Render();
 
 	private:
 		// Cached pointer to device resources.

@@ -12,25 +12,28 @@ namespace DX11UWA
 	{
 	public:
 		My3DSceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources);
-		void mCreateDeviceDependentResources(void);
-		void mCreateWindowSizeDependentResources(void);
-		void mReleaseDeviceDependentResources(void);
-		void mUpdate(DX::StepTimer const& timer);
-		void mRender(void);
-		void mStartTracking(void);
-		void mTrackingUpdate(float positionX);
-		void mStopTracking(void);
+		void CreateDeviceDependentResources(void);
+		void CreateWindowSizeDependentResources(void);
+		void ReleaseDeviceDependentResources(void);
+		void Update(DX::StepTimer const& timer);
+		void Render(void);
+		void StartTracking(void);
+		void TrackingUpdate(float positionX);
+		void StopTracking(void);
 		inline bool IsTracking(void) { return m_tracking; }
 
 		// Helper functions for keyboard and mouse input
-		void mSetKeyboardButtons(const char* list);
-		void mSetMousePosition(const Windows::UI::Input::PointerPoint^ pos);
-		void mSetInputDeviceData(const char* kb, const Windows::UI::Input::PointerPoint^ pos);
+		void SetKeyboardButtons(const char* list);
+		void SetMousePosition(const Windows::UI::Input::PointerPoint^ pos);
+		void SetInputDeviceData(const char* kb, const Windows::UI::Input::PointerPoint^ pos);
+
+		//My function:
+		void CreateModel(void);
 
 
 	private:
-		void mRotate(float radians);
-		void mUpdateCamera(DX::StepTimer const& timer, float const moveSpd, float const rotSpd);
+		void Rotate(float radians);
+		void UpdateCamera(DX::StepTimer const& timer, float const moveSpd, float const rotSpd);
 
 	private:
 		// Cached pointer to device resources.

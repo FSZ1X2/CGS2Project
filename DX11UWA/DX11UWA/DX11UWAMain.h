@@ -5,6 +5,7 @@
 #include "Content\Sample3DSceneRenderer.h"
 #include "Content\SampleFpsTextRenderer.h"
 #include "Content\My3DSceneRenderer.h"
+#include "Content\MyFpsTextRenderer.h"
 
 // Renders Direct2D and 3D content on the screen.
 namespace DX11UWA
@@ -31,8 +32,11 @@ namespace DX11UWA
 		std::shared_ptr<DX::DeviceResources> m_deviceResources;
 
 		// TODO: Replace with your own content renderers.
-		std::unique_ptr<Sample3DSceneRenderer> m_sceneRenderer;
-		std::unique_ptr<SampleFpsTextRenderer> m_fpsTextRenderer;
+		//std::unique_ptr<Sample3DSceneRenderer> m_sceneRenderer;
+		//std::unique_ptr<SampleFpsTextRenderer> m_fpsTextRenderer;
+
+		std::unique_ptr<My3DSceneRenderer> m_sceneRenderer;
+		std::unique_ptr<MyFpsTextRenderer> m_fpsTextRenderer;
 
 		// Rendering loop timer.
 		DX::StepTimer m_timer;

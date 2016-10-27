@@ -13,3 +13,8 @@
 #include <memory>
 #include <agile.h>
 #include <concrt.h>
+#include <fstream>
+#include <vector>
+#include <map>
+#include <string>
+using namespace std;

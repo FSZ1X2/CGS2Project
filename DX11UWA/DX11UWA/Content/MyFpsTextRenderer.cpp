@@ -40,11 +40,11 @@ MyFpsTextRenderer::MyFpsTextRenderer(const std::shared_ptr<DX::DeviceResources>&
 		m_deviceResources->GetD2DFactory()->CreateDrawingStateBlock(&m_stateBlock)
 		);
 
-	mCreateDeviceDependentResources();
+	CreateDeviceDependentResources();
 }
 
 // Updates the text to be displayed.
-void MyFpsTextRenderer::mUpdate(DX::StepTimer const& timer)
+void MyFpsTextRenderer::Update(DX::StepTimer const& timer)
 {
 	// Update display text.
 	uint32 fps = timer.GetFramesPerSecond();
@@ -73,7 +73,7 @@ void MyFpsTextRenderer::mUpdate(DX::StepTimer const& timer)
 }
 
 // Renders a frame to the screen.
-void MyFpsTextRenderer::mRender()
+void MyFpsTextRenderer::Render()
 {
 	ID2D1DeviceContext* context = m_deviceResources->GetD2DDeviceContext();
 	Windows::Foundation::Size logicalSize = m_deviceResources->GetLogicalSize();
@@ -110,13 +110,13 @@ void MyFpsTextRenderer::mRender()
 	context->RestoreDrawingState(m_stateBlock.Get());
 }
 
-void MyFpsTextRenderer::mCreateDeviceDependentResources()
+void MyFpsTextRenderer::CreateDeviceDependentResources()
 {
 	DX::ThrowIfFailed(
 		m_deviceResources->GetD2DDeviceContext()->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), &m_whiteBrush)
 		);
 }
-void MyFpsTextRenderer::mReleaseDeviceDependentResources()
+void MyFpsTextRenderer::ReleaseDeviceDependentResources()
 {
 	m_whiteBrush.Reset();
 }
