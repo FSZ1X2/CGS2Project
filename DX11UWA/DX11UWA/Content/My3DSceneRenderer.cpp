@@ -221,11 +221,11 @@ void My3DSceneRenderer::Render(void)
 	// Prepare the constant buffer to send it to the graphics device.
 	context->UpdateSubresource1(m_constantBuffer.Get(), 0, NULL, &m_constantBufferData, 0, 0, 0);
 	// Each vertex is one instance of the VertexPositionColor struct.
-	UINT stride = sizeof(VertexPositionColor);
+	UINT stride = sizeof(VertexPositionUVNormal);
 	UINT offset = 0;
 	context->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
 	// Each index is one 16-bit unsigned integer (short).
-	context->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
+	context->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	context->IASetInputLayout(m_inputLayout.Get());
 	// Attach our vertex shader.
@@ -253,6 +253,7 @@ void My3DSceneRenderer::CreateDeviceDependentResources(void)
 		{
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "UV", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
 
 		DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateInputLayout(vertexDesc, ARRAYSIZE(vertexDesc), &fileData[0], fileData.size(), &m_inputLayout));
@@ -347,7 +348,7 @@ void My3DSceneRenderer::ReleaseDeviceDependentResources(void)
 
 void My3DSceneRenderer::CreateModel(void)
 {
-	//// TODO: Load mesh data and send it to the graphics card.
+	/*//// TODO: Load mesh data and send it to the graphics card.
 	//std::fstream file;
 
 	//file.open(path, std::ios_base::binary | std::ios_base::in);
@@ -411,59 +412,179 @@ void My3DSceneRenderer::CreateModel(void)
 	//	delete[] meshname;
 	//	delete[] vertexData;
 	//	delete[] indexData;
-	}
-	// Load mesh vertices. Each vertex has a position and a color.
-	static const VertexPositionColor cubeVertices[] =
+	//}*/
+	std::vector< unsigned int > vertexIndices, uvIndices, normalIndices;
+	std::vector< XMFLOAT3 > temp_vertices;
+	std::vector< XMFLOAT3 > temp_uvs;
+	std::vector< XMFLOAT3 > temp_normals;
+
+	std::vector< XMFLOAT3 > out_vertices;
+	std::vector< XMFLOAT3 > out_uvs;
+	std::vector< XMFLOAT3 > out_normals;
+
+	/*std::ifstream file;
+
+	file.open("test pyramid.obj");
+
+	if (file.is_open())
 	{
-		{ XMFLOAT3(-0.5f, -0.5f, -0.5f), XMFLOAT3(0.0f, 0.0f, 0.0f) },
-		{ XMFLOAT3(-0.5f, -0.5f,  0.5f), XMFLOAT3(0.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(-0.5f,  0.5f, -0.5f), XMFLOAT3(0.0f, 1.0f, 0.0f) },
-		{ XMFLOAT3(-0.5f,  0.5f,  0.5f), XMFLOAT3(0.0f, 1.0f, 1.0f) },
-		{ XMFLOAT3(0.5f, -0.5f, -0.5f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
-		{ XMFLOAT3(0.5f, -0.5f,  0.5f), XMFLOAT3(1.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(0.5f,  0.5f, -0.5f), XMFLOAT3(1.0f, 1.0f, 0.0f) },
-		{ XMFLOAT3(0.5f,  0.5f,  0.5f), XMFLOAT3(1.0f, 1.0f, 1.0f) },
-	};
+		string line;
+		while (std::getline(file, line))
+		{
+			// read the first word of the line
+			if (line.find_first_of(line) == EOF)
+				break;
+			if (line.find_first_of(line) == 'v')
+			{
+				XMFLOAT3 vertex;
+				fscanf(file, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z);
+				temp_vertices.push_back(vertex);
+			}
+			else if (line.find_first_of(line) == 'vt')
+			{
+				XMFLOAT3 uv;
+				fscanf(file, "%f %f\n", &uv.x, &uv.y);
+				temp_uvs.push_back(uv);
+			}
+			else if (line.find_first_of(line) == 'vn')
+			{
+				XMFLOAT3 normal;
+				fscanf(file, "%f %f %f\n", &normal.x, &normal.y, &normal.z);
+				temp_normals.push_back(normal);
+			}
+			else if (line.find_first_of(line) == 'f')
+			{
+				std::string vertex1, vertex2, vertex3;
+				unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
+				int matches = fscanf(file, "%d/%d/%d %d/%d/%d %d/%d/%d\n", &vertexIndex[0], &uvIndex[0], &normalIndex[0], &vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2]);
+				if (matches != 9) {
+					printf("File can't be read by our simple parser : ( Try exporting with other options\n");
+					//return false;
+					break;
+				}
+				vertexIndices.push_back(vertexIndex[0]);
+				vertexIndices.push_back(vertexIndex[1]);
+				vertexIndices.push_back(vertexIndex[2]);
+				uvIndices.push_back(uvIndex[0]);
+				uvIndices.push_back(uvIndex[1]);
+				uvIndices.push_back(uvIndex[2]);
+				normalIndices.push_back(normalIndex[0]);
+				normalIndices.push_back(normalIndex[1]);
+				normalIndices.push_back(normalIndex[2]);
+			}
+		}
+	}*/
+
+	FILE * file;
+	if (fopen_s(&file, "Assets/testpyramid.obj", "r") != 0)
+	{
+		printf("Impossible to open the file !\n");
+	}
+	else
+	{
+		while (1)
+		{
+			char lineHeader[128];
+			// read the first word of the line
+			int res = fscanf_s(file, "%s", lineHeader, 128);
+			if (res == EOF)
+				break;
+			if (strcmp(lineHeader, "v") == 0)
+			{
+				XMFLOAT3 vertex;
+				fscanf_s(file, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z);
+				temp_vertices.push_back(vertex);
+			}
+			else if (strcmp(lineHeader, "vt") == 0)
+			{
+				XMFLOAT3 uv;
+				fscanf_s(file, "%f %f\n", &uv.x, &uv.y);
+				temp_uvs.push_back(uv);
+			}
+			else if (strcmp(lineHeader, "vn") == 0)
+			{
+				XMFLOAT3 normal;
+				fscanf_s(file, "%f %f %f\n", &normal.x, &normal.y, &normal.z);
+				temp_normals.push_back(normal);
+			}
+			else if (strcmp(lineHeader, "f") == 0)
+			{
+				std::string vertex1, vertex2, vertex3;
+				unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
+				int matches = fscanf_s(file, "%d/%d/%d %d/%d/%d %d/%d/%d\n", &vertexIndex[0], &uvIndex[0], &normalIndex[0], &vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2]);
+				if (matches != 9)
+				{
+					printf("File can't be read by our simple parser : ( Try exporting with other options\n");
+					break;
+				}
+				vertexIndices.push_back(vertexIndex[0]);
+				vertexIndices.push_back(vertexIndex[1]);
+				vertexIndices.push_back(vertexIndex[2]);
+				uvIndices.push_back(uvIndex[0]);
+				uvIndices.push_back(uvIndex[1]);
+				uvIndices.push_back(uvIndex[2]);
+				normalIndices.push_back(normalIndex[0]);
+				normalIndices.push_back(normalIndex[1]);
+				normalIndices.push_back(normalIndex[2]);
+			}
+		}
+	}
+
+	for (unsigned int i = 0; i < vertexIndices.size(); i++)
+	{
+		unsigned int vertexIndex = vertexIndices[i];
+		XMFLOAT3 vertex = temp_vertices[vertexIndex - 1];
+		out_vertices.push_back(vertex);
+
+		unsigned int uvIndex = uvIndices[i];
+		XMFLOAT3 uvs = temp_uvs[uvIndex - 1];
+		out_uvs.push_back(uvs);
+
+		unsigned int normalIndex = normalIndices[i];
+		XMFLOAT3 normal = temp_normals[normalIndex - 1];
+		out_normals.push_back(normal);
+	}
+
+	size_t sizeofvertex = out_vertices.size();
+	std::vector< VertexPositionUVNormal > LoadModels;
+	for (size_t i = 0; i < sizeofvertex; i++)
+	{
+		VertexPositionUVNormal LoadModel;
+		LoadModel.pos.x = out_vertices[i].x;
+		LoadModel.pos.y = out_vertices[i].y;
+		LoadModel.pos.z = out_vertices[i].z;
+
+		LoadModel.uv.x = out_uvs[i].x;
+		LoadModel.uv.y = out_uvs[i].y;
+		LoadModel.uv.z = 0.0f;// out_uvs[i].z;
+
+		LoadModel.normal.x = out_normals[i].x;
+		LoadModel.normal.y = out_normals[i].y;
+		LoadModel.normal.z = out_normals[i].z;
+
+		LoadModels.push_back(LoadModel);
+	}
 
 	D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };
-	vertexBufferData.pSysMem = cubeVertices;
+	vertexBufferData.pSysMem = &LoadModels[0];
 	vertexBufferData.SysMemPitch = 0;
 	vertexBufferData.SysMemSlicePitch = 0;
-	CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(cubeVertices), D3D11_BIND_VERTEX_BUFFER);
+	CD3D11_BUFFER_DESC vertexBufferDesc(LoadModels.size() * sizeof(VertexPositionUVNormal), D3D11_BIND_VERTEX_BUFFER);
 	DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&vertexBufferDesc, &vertexBufferData, &m_vertexBuffer));
 
-	// Load mesh indices. Each trio of indices represents
-	// a triangle to be rendered on the screen.
-	// For example: 0,2,1 means that the vertices with indexes
-	// 0, 2 and 1 from the vertex buffer compose the 
-	// first triangle of this mesh.
-	static const unsigned short cubeIndices[] =
+	size_t sizeofindex = vertexIndices.size();
+	std::vector<unsigned int> LoadModelIndex;
+	for (size_t i = 0; i < sizeofindex; i++)
 	{
-		0,1,2, // -x
-		1,3,2,
+		LoadModelIndex.push_back(i);
+	}
 
-		4,6,5, // +x
-		5,6,7,
-
-		0,5,1, // -y
-		0,4,5,
-
-		2,7,6, // +y
-		2,3,7,
-
-		0,6,4, // -z
-		0,2,6,
-
-		1,7,3, // +z
-		1,5,7,
-	};
-
-	m_indexCount = ARRAYSIZE(cubeIndices);
+	m_indexCount = (unsigned int)sizeofindex;
 
 	D3D11_SUBRESOURCE_DATA indexBufferData = { 0 };
-	indexBufferData.pSysMem = cubeIndices;
+	indexBufferData.pSysMem = &LoadModelIndex[0];
 	indexBufferData.SysMemPitch = 0;
 	indexBufferData.SysMemSlicePitch = 0;
-	CD3D11_BUFFER_DESC indexBufferDesc(sizeof(cubeIndices), D3D11_BIND_INDEX_BUFFER);
+	CD3D11_BUFFER_DESC indexBufferDesc(LoadModelIndex.size()*sizeof(unsigned int), D3D11_BIND_INDEX_BUFFER);
 	DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&indexBufferDesc, &indexBufferData, &m_indexBuffer));
 }
