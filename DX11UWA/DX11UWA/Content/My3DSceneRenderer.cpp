@@ -476,7 +476,7 @@ void My3DSceneRenderer::CreateModel(void)
 	}*/
 
 	FILE * file;
-	if (fopen_s(&file, "Assets/testpyramid.obj", "r") != 0)
+	if (fopen_s(&file, "Assets/cat.obj", "r") != 0)
 	{
 		printf("Impossible to open the file !\n");
 	}

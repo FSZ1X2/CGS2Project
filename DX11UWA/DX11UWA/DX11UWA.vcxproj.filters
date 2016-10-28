@@ -101,10 +101,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="DX11UWA_TemporaryKey.pfx" />
-  </ItemGroup>
-  <ItemGroup>
-    <Object Include="Assets\testpyramid.obj">
+    <None Include="Assets\testpyramid.obj" />
+    <None Include="Assets\cat.obj">
       <Filter>Assets</Filter>
-    </Object>
+    </None>
   </ItemGroup>
 </Project>
