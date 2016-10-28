@@ -217,6 +217,10 @@ void My3DSceneRenderer::Render(void)
 
 	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixInverse(nullptr, XMLoadFloat4x4(&m_camera))));
 
+	//D3D11_MAPPED_SUBRESOURCE ms;
+	//context->Map(m_constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
+	//memcpy(ms.pData, &toShader, sizeof(toShader));
+	//context->Unmap(m_constantBuffer, 0);
 
 	// Prepare the constant buffer to send it to the graphics device.
 	context->UpdateSubresource1(m_constantBuffer.Get(), 0, NULL, &m_constantBufferData, 0, 0, 0);
@@ -228,6 +232,7 @@ void My3DSceneRenderer::Render(void)
 	context->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	context->IASetInputLayout(m_inputLayout.Get());
+	context->PSSetShaderResources(0, 1, m_srv.GetAddressOf());
 	// Attach our vertex shader.
 	context->VSSetShader(m_vertexShader.Get(), nullptr, 0);
 	// Send the constant buffer to the graphics device.
@@ -271,61 +276,9 @@ void My3DSceneRenderer::CreateDeviceDependentResources(void)
 	// Once both shaders are loaded, create the mesh.
 	auto createCubeTask = (createPSTask && createVSTask).then([this]()
 	{
-		CreateModel();
-		// Load mesh vertices. Each vertex has a position and a color.
-		//static const VertexPositionColor cubeVertices[] =
-		//{
-		//	{XMFLOAT3(-0.5f, -0.5f, -0.5f), XMFLOAT3(0.0f, 0.0f, 0.0f)},
-		//	{XMFLOAT3(-0.5f, -0.5f,  0.5f), XMFLOAT3(0.0f, 0.0f, 1.0f)},
-		//	{XMFLOAT3(-0.5f,  0.5f, -0.5f), XMFLOAT3(0.0f, 1.0f, 0.0f)},
-		//	{XMFLOAT3(-0.5f,  0.5f,  0.5f), XMFLOAT3(0.0f, 1.0f, 1.0f)},
-		//	{XMFLOAT3( 0.5f, -0.5f, -0.5f), XMFLOAT3(1.0f, 0.0f, 0.0f)},
-		//	{XMFLOAT3( 0.5f, -0.5f,  0.5f), XMFLOAT3(1.0f, 0.0f, 1.0f)},
-		//	{XMFLOAT3( 0.5f,  0.5f, -0.5f), XMFLOAT3(1.0f, 1.0f, 0.0f)},
-		//	{XMFLOAT3( 0.5f,  0.5f,  0.5f), XMFLOAT3(1.0f, 1.0f, 1.0f)},
-		//};
-
-		//D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };
-		//vertexBufferData.pSysMem = cubeVertices;
-		//vertexBufferData.SysMemPitch = 0;
-		//vertexBufferData.SysMemSlicePitch = 0;
-		//CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(cubeVertices), D3D11_BIND_VERTEX_BUFFER);
-		//DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&vertexBufferDesc, &vertexBufferData, &m_vertexBuffer));
-
-		//// Load mesh indices. Each trio of indices represents
-		//// a triangle to be rendered on the screen.
-		//// For example: 0,2,1 means that the vertices with indexes
-		//// 0, 2 and 1 from the vertex buffer compose the 
-		//// first triangle of this mesh.
-		//static const unsigned short cubeIndices[] =
-		//{
-		//	0,1,2, // -x
-		//	1,3,2,
-
-		//	4,6,5, // +x
-		//	5,6,7,
-
-		//	0,5,1, // -y
-		//	0,4,5,
-
-		//	2,7,6, // +y
-		//	2,3,7,
-
-		//	0,6,4, // -z
-		//	0,2,6,
-
-		//	1,7,3, // +z
-		//	1,5,7,
-		//};
-
-		//m_indexCount = ARRAYSIZE(cubeIndices);
-
-		//D3D11_SUBRESOURCE_DATA indexBufferData = { 0 };
-		//indexBufferData.pSysMem = cubeIndices;
-		//indexBufferData.SysMemPitch = 0;
-		//indexBufferData.SysMemSlicePitch = 0;
-		//CD3D11_BUFFER_DESC indexBufferDesc(sizeof(cubeIndices), D3D11_BIND_INDEX_BUFFER);
-		//DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&indexBufferDesc, &indexBufferData, &m_indexBuffer));
+		CreateModel("Assets/cat.obj");
+		HRESULT hr = CreateDDSTextureFromFile(m_deviceResources->GetD3DDevice(), L"Assets/cat_diff.dds", NULL, m_srv.GetAddressOf());
+		DX::ThrowIfFailed(hr);
 	});
 
 	// Once the cube is loaded, the object is ready to be rendered.
@@ -346,73 +299,9 @@ void My3DSceneRenderer::ReleaseDeviceDependentResources(void)
 	m_indexBuffer.Reset();
 }
 
-void My3DSceneRenderer::CreateModel(void)
+//My function:
+void My3DSceneRenderer::CreateModel(const char *path)
 {
-	/*//// TODO: Load mesh data and send it to the graphics card.
-	//std::fstream file;
-
-	//file.open(path, std::ios_base::binary | std::ios_base::in);
-
-	//objectmesh save;
-
-	//if (file.is_open())
-	//{
-	//	unsigned int len;
-	//	file.read((char *)&len, sizeof(unsigned int));
-	//	char *meshname;
-	//	meshname = new char[len];
-	//	file.read(meshname, len);
-
-	//	unsigned int tcount;
-	//	file.read((char *)&tcount, sizeof(unsigned int));
-	//	char *savetextureNames;
-	//	for (unsigned int i = 0; i < tcount; i++)
-	//	{
-	//		file.read((char *)&len, sizeof(len));
-	//		savetextureNames = new char[len];
-	//		file.read(savetextureNames, len);
-	//		string save1 = savetextureNames;
-	//		size_t found = save1.find_last_of("/\\");
-	//		save.textureNames = save1.substr(found + 1);
-	//		delete[] savetextureNames;
-	//	}
-
-	//	unsigned int vcount;
-	//	file.read((char *)&vcount, sizeof(unsigned int));
-	//	VertexPositionUVNormal *vertexData;
-	//	vertexData = new VertexPositionUVNormal[vcount];
-	//	for (unsigned int i = 0; i < vcount; i++)
-	//	{
-	//		file.read((char*)&vertexData[i].pos.x, sizeof(float));
-	//		file.read((char*)&vertexData[i].pos.y, sizeof(float));
-	//		file.read((char*)&vertexData[i].pos.z, sizeof(float));
-
-	//		file.read((char*)&vertexData[i].normal.x, sizeof(float));
-	//		file.read((char*)&vertexData[i].normal.y, sizeof(float));
-	//		file.read((char*)&vertexData[i].normal.z, sizeof(float));
-
-	//		file.read((char*)&vertexData[i].uv.x, sizeof(float));
-	//		file.read((char*)&vertexData[i].uv.y, sizeof(float));
-	//	}
-
-	//	unsigned int icount;
-	//	file.read((char *)&icount, sizeof(unsigned int));
-	//	unsigned int *indexData;
-	//	indexData = new unsigned int[icount * 3];
-	//	file.read((char*)&indexData[0], 4 * (icount * 3));
-
-	//	file.close();
-
-	//	DXLayer.LoadVertexAndIndexData_PosNormalTexture(vertexData, vcount, indexData, icount * 3, &save.info);
-	//	DXLayer.LoadTexture(save.textureNames.c_str());
-	//	save.no = num;
-
-	//	list.push_back(save);
-
-	//	delete[] meshname;
-	//	delete[] vertexData;
-	//	delete[] indexData;
-	//}*/
 	std::vector< unsigned int > vertexIndices, uvIndices, normalIndices;
 	std::vector< XMFLOAT3 > temp_vertices;
 	std::vector< XMFLOAT3 > temp_uvs;
@@ -422,61 +311,8 @@ void My3DSceneRenderer::CreateModel(void)
 	std::vector< XMFLOAT3 > out_uvs;
 	std::vector< XMFLOAT3 > out_normals;
 
-	/*std::ifstream file;
-
-	file.open("test pyramid.obj");
-
-	if (file.is_open())
-	{
-		string line;
-		while (std::getline(file, line))
-		{
-			// read the first word of the line
-			if (line.find_first_of(line) == EOF)
-				break;
-			if (line.find_first_of(line) == 'v')
-			{
-				XMFLOAT3 vertex;
-				fscanf(file, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z);
-				temp_vertices.push_back(vertex);
-			}
-			else if (line.find_first_of(line) == 'vt')
-			{
-				XMFLOAT3 uv;
-				fscanf(file, "%f %f\n", &uv.x, &uv.y);
-				temp_uvs.push_back(uv);
-			}
-			else if (line.find_first_of(line) == 'vn')
-			{
-				XMFLOAT3 normal;
-				fscanf(file, "%f %f %f\n", &normal.x, &normal.y, &normal.z);
-				temp_normals.push_back(normal);
-			}
-			else if (line.find_first_of(line) == 'f')
-			{
-				std::string vertex1, vertex2, vertex3;
-				unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
-				int matches = fscanf(file, "%d/%d/%d %d/%d/%d %d/%d/%d\n", &vertexIndex[0], &uvIndex[0], &normalIndex[0], &vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2]);
-				if (matches != 9) {
-					printf("File can't be read by our simple parser : ( Try exporting with other options\n");
-					//return false;
-					break;
-				}
-				vertexIndices.push_back(vertexIndex[0]);
-				vertexIndices.push_back(vertexIndex[1]);
-				vertexIndices.push_back(vertexIndex[2]);
-				uvIndices.push_back(uvIndex[0]);
-				uvIndices.push_back(uvIndex[1]);
-				uvIndices.push_back(uvIndex[2]);
-				normalIndices.push_back(normalIndex[0]);
-				normalIndices.push_back(normalIndex[1]);
-				normalIndices.push_back(normalIndex[2]);
-			}
-		}
-	}*/
-
 	FILE * file;
-	if (fopen_s(&file, "Assets/cat.obj", "r") != 0)
+	if (fopen_s(&file, path, "r") != 0)
 	{
 		printf("Impossible to open the file !\n");
 	}
@@ -499,6 +335,7 @@ void My3DSceneRenderer::CreateModel(void)
 			{
 				XMFLOAT3 uv;
 				fscanf_s(file, "%f %f\n", &uv.x, &uv.y);
+				uv.y = 1.0f - uv.y;
 				temp_uvs.push_back(uv);
 			}
 			else if (strcmp(lineHeader, "vn") == 0)
@@ -587,4 +424,14 @@ void My3DSceneRenderer::CreateModel(void)
 	indexBufferData.SysMemSlicePitch = 0;
 	CD3D11_BUFFER_DESC indexBufferDesc(LoadModelIndex.size()*sizeof(unsigned int), D3D11_BIND_INDEX_BUFFER);
 	DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&indexBufferDesc, &indexBufferData, &m_indexBuffer));
+}
+
+float My3DSceneRenderer::Clamps(float num)
+{
+	if (num > 1)
+		return 1;
+	else if (num < 0)
+		return 0;
+	else
+		return num;
 }

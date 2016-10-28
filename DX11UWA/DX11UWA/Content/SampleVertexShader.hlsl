@@ -30,6 +30,17 @@ PixelShaderInput main(VertexShaderInput input)
 
 	// Transform the vertex position into projected space.
 	pos = mul(pos, model);
+
+	//float dotD = Clamps(pos*DirectionalLight.pos));
+	//float dotP = Clamps(pos*(PointLight.pos-pos));
+	//unsigned int colorlerpD = ChangeColor3(DirectionalLight.color, BLACK, Clamps(dotD + ambient));
+	//unsigned int colorlerpP = ChangeColor3(PointLight.color, BLACK, Clamps(dotP));
+
+	//float ATTENUATION = 1.0 - Clamps(Leng(Sub(PointLight, pos)) / lightradius);
+	//unsigned int colorp = MuColor(colorlerpP, ATTENUATION);
+	//unsigned int combinecolor = Combine_colors(colorlerpD, colorp);
+	//multiplyMe.color = combinecolor;
+
 	pos = mul(pos, view);
 	pos = mul(pos, projection);
 	output.pos = pos;

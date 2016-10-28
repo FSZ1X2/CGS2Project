@@ -3,6 +3,7 @@
 #include "..\Common\DeviceResources.h"
 #include "ShaderStructures.h"
 #include "..\Common\StepTimer.h"
+#include "Common\DDSTextureLoader.h"
 
 
 namespace DX11UWA
@@ -28,7 +29,8 @@ namespace DX11UWA
 		void SetInputDeviceData(const char* kb, const Windows::UI::Input::PointerPoint^ pos);
 
 		//My function:
-		void CreateModel(void);
+		void CreateModel(const char *path);
+		float Clamps(float num);
 
 
 	private:
@@ -46,6 +48,7 @@ namespace DX11UWA
 		Microsoft::WRL::ComPtr<ID3D11VertexShader>	m_vertexShader;
 		Microsoft::WRL::ComPtr<ID3D11PixelShader>	m_pixelShader;
 		Microsoft::WRL::ComPtr<ID3D11Buffer>		m_constantBuffer;
+		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_srv;
 
 		// System resources for cube geometry.
 		ModelViewProjectionConstantBuffer	m_constantBufferData;
@@ -63,6 +66,13 @@ namespace DX11UWA
 
 		// Matrix data member for the camera
 		DirectX::XMFLOAT4X4 m_camera;
+
+		//Light stuffs
+		VertexPositionColor DirectionalLight;
+		VertexPositionColor PointLight;
+
+		//Texture stuffs
+		VertexPositionUVNormal toShader;
 	};
 }
 
