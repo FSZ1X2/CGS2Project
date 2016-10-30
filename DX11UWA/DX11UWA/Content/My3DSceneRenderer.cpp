@@ -427,13 +427,3 @@ void My3DSceneRenderer::CreateModel(const char *path)
 	CD3D11_BUFFER_DESC indexBufferDesc(LoadModelIndex.size()*sizeof(unsigned int), D3D11_BIND_INDEX_BUFFER);
 	DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&indexBufferDesc, &indexBufferData, &m_indexBuffer));
 }
-
-float My3DSceneRenderer::Clamps(float num)
-{
-	if (num > 1)
-		return 1;
-	else if (num < 0)
-		return 0;
-	else
-		return num;
-}
