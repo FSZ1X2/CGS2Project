@@ -98,6 +98,12 @@
     <Image Include="Assets\cat_diff.dds">
       <Filter>Assets</Filter>
     </Image>
+    <Image Include="Assets\cat_norm.dds">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\cat_spec.dds">
+      <Filter>Assets</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />

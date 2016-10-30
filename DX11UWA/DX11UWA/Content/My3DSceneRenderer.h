@@ -48,7 +48,9 @@ namespace DX11UWA
 		Microsoft::WRL::ComPtr<ID3D11VertexShader>	m_vertexShader;
 		Microsoft::WRL::ComPtr<ID3D11PixelShader>	m_pixelShader;
 		Microsoft::WRL::ComPtr<ID3D11Buffer>		m_constantBuffer;
-		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_srv;
+		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_catdiff;
+		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_catnorm;
+		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_catspec;
 
 		// System resources for cube geometry.
 		ModelViewProjectionConstantBuffer	m_constantBufferData;
@@ -68,11 +70,8 @@ namespace DX11UWA
 		DirectX::XMFLOAT4X4 m_camera;
 
 		//Light stuffs
-		VertexPositionColor DirectionalLight;
-		VertexPositionColor PointLight;
+		
 
-		//Texture stuffs
-		VertexPositionUVNormal toShader;
 	};
 }
 

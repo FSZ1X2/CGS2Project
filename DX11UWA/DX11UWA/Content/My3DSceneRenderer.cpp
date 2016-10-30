@@ -217,11 +217,6 @@ void My3DSceneRenderer::Render(void)
 
 	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixInverse(nullptr, XMLoadFloat4x4(&m_camera))));
 
-	//D3D11_MAPPED_SUBRESOURCE ms;
-	//context->Map(m_constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
-	//memcpy(ms.pData, &toShader, sizeof(toShader));
-	//context->Unmap(m_constantBuffer, 0);
-
 	// Prepare the constant buffer to send it to the graphics device.
 	context->UpdateSubresource1(m_constantBuffer.Get(), 0, NULL, &m_constantBufferData, 0, 0, 0);
 	// Each vertex is one instance of the VertexPositionColor struct.
@@ -232,7 +227,10 @@ void My3DSceneRenderer::Render(void)
 	context->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	context->IASetInputLayout(m_inputLayout.Get());
-	context->PSSetShaderResources(0, 1, m_srv.GetAddressOf());
+	//set texture
+	context->PSSetShaderResources(0, 1, m_catdiff.GetAddressOf());
+	//context->PSSetShaderResources(1, 1, m_catnorm.GetAddressOf());
+	//context->PSSetShaderResources(2, 1, m_catspec.GetAddressOf());
 	// Attach our vertex shader.
 	context->VSSetShader(m_vertexShader.Get(), nullptr, 0);
 	// Send the constant buffer to the graphics device.
@@ -277,8 +275,12 @@ void My3DSceneRenderer::CreateDeviceDependentResources(void)
 	auto createCubeTask = (createPSTask && createVSTask).then([this]()
 	{
 		CreateModel("Assets/cat.obj");
-		HRESULT hr = CreateDDSTextureFromFile(m_deviceResources->GetD3DDevice(), L"Assets/cat_diff.dds", NULL, m_srv.GetAddressOf());
+		HRESULT hr = CreateDDSTextureFromFile(m_deviceResources->GetD3DDevice(), L"Assets/cat_diff.dds", NULL, m_catdiff.GetAddressOf());
 		DX::ThrowIfFailed(hr);
+		//HRESULT hr1 = CreateDDSTextureFromFile(m_deviceResources->GetD3DDevice(), L"Assets/cat_norm.dds", NULL, m_catnorm.GetAddressOf());
+		//DX::ThrowIfFailed(hr1);
+		//HRESULT hr2 = CreateDDSTextureFromFile(m_deviceResources->GetD3DDevice(), L"Assets/cat_spec.dds", NULL, m_catspec.GetAddressOf());
+		//DX::ThrowIfFailed(hr2);
 	});
 
 	// Once the cube is loaded, the object is ready to be rendered.
