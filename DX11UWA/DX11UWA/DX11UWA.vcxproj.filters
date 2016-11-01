@@ -104,6 +104,9 @@
     <Image Include="Assets\cat_spec.dds">
       <Filter>Assets</Filter>
     </Image>
+    <Image Include="Assets\benchwhite.dds">
+      <Filter>Assets</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />
@@ -111,6 +114,9 @@
   <ItemGroup>
     <None Include="DX11UWA_TemporaryKey.pfx" />
     <None Include="Assets\cat.obj">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="Assets\bench.mesh">
       <Filter>Assets</Filter>
     </None>
   </ItemGroup>

@@ -29,9 +29,9 @@ namespace DX11UWA
 		void SetInputDeviceData(const char* kb, const Windows::UI::Input::PointerPoint^ pos);
 
 		//My function:
+		void CreateCube();
 		void CreateModel(const char *path);
-		float Clamps(float num);
-
+		void LoadMesh(const char *path);
 
 	private:
 		void Rotate(float radians);
@@ -41,7 +41,7 @@ namespace DX11UWA
 		// Cached pointer to device resources.
 		std::shared_ptr<DX::DeviceResources> m_deviceResources;
 
-		// Direct3D resources for cube geometry.
+		// Direct3D resources for cat geometry.
 		Microsoft::WRL::ComPtr<ID3D11InputLayout>	m_inputLayout;
 		Microsoft::WRL::ComPtr<ID3D11Buffer>		m_vertexBuffer;
 		Microsoft::WRL::ComPtr<ID3D11Buffer>		m_indexBuffer;
@@ -52,7 +52,7 @@ namespace DX11UWA
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_catnorm;
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_catspec;
 
-		// System resources for cube geometry.
+		// System resources for cat geometry.
 		ModelViewProjectionConstantBuffer	m_constantBufferData;
 		uint32	m_indexCount;
 

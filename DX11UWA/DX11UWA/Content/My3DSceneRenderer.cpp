@@ -274,7 +274,9 @@ void My3DSceneRenderer::CreateDeviceDependentResources(void)
 	// Once both shaders are loaded, create the mesh.
 	auto createCubeTask = (createPSTask && createVSTask).then([this]()
 	{
+		//LoadMesh("Assets/bench.mesh");
 		CreateModel("Assets/cat.obj");
+		//CreateCube();
 		HRESULT hr = CreateDDSTextureFromFile(m_deviceResources->GetD3DDevice(), L"Assets/cat_diff.dds", NULL, m_catdiff.GetAddressOf());
 		DX::ThrowIfFailed(hr);
 		//HRESULT hr1 = CreateDDSTextureFromFile(m_deviceResources->GetD3DDevice(), L"Assets/cat_norm.dds", NULL, m_catnorm.GetAddressOf());
@@ -425,5 +427,148 @@ void My3DSceneRenderer::CreateModel(const char *path)
 	indexBufferData.SysMemPitch = 0;
 	indexBufferData.SysMemSlicePitch = 0;
 	CD3D11_BUFFER_DESC indexBufferDesc(LoadModelIndex.size()*sizeof(unsigned int), D3D11_BIND_INDEX_BUFFER);
+	DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&indexBufferDesc, &indexBufferData, &m_indexBuffer));
+}
+
+void My3DSceneRenderer::LoadMesh(const char *path)
+{
+	// TODO: Load mesh data and send it to the graphics card.
+	std::fstream file;
+
+	file.open(path, std::ios_base::binary | std::ios_base::in);
+
+	std::vector< VertexPositionUVNormal > vertexData;
+	std::vector< unsigned int > indexData;
+	string textureNames;
+
+	if (file.is_open())
+	{
+		unsigned int len;
+		file.read((char *)&len, sizeof(unsigned int));
+		char *meshname;
+		meshname = new char[len];
+		file.read(meshname, len);
+
+		unsigned int tcount;
+		file.read((char *)&tcount, sizeof(unsigned int));
+		char *savetextureNames;
+		for (unsigned int i = 0; i < tcount; i++)
+		{
+			file.read((char *)&len, sizeof(len));
+			savetextureNames = new char[len];
+			file.read(savetextureNames, len);
+			string save1 = savetextureNames;
+			size_t found = save1.find_last_of("/\\");
+			textureNames = save1.substr(found + 1);
+			delete[] savetextureNames;
+		}
+
+		unsigned int vcount;
+		file.read((char *)&vcount, sizeof(unsigned int));
+		for (unsigned int i = 0; i < vcount; i++)
+		{
+			VertexPositionUVNormal data;
+			file.read((char*)&data.pos.x, sizeof(float));
+			file.read((char*)&data.pos.y, sizeof(float));
+			file.read((char*)&data.pos.z, sizeof(float));
+
+			file.read((char*)&data.normal.x, sizeof(float));
+			file.read((char*)&data.normal.y, sizeof(float));
+			file.read((char*)&data.normal.z, sizeof(float));
+
+			file.read((char*)&data.uv.x, sizeof(float));
+			file.read((char*)&data.uv.y, sizeof(float));
+
+			data.pos.x *= 0.02f;
+			data.pos.y *= 0.02f;
+			data.pos.z *= 0.02f;
+
+			data.uv.x = 1 - data.uv.x;
+			data.uv.y = 1 - data.uv.y;
+			data.uv.z = 0.0f;
+
+			vertexData.push_back(data);
+		}
+
+		unsigned int icount;
+		file.read((char *)&icount, sizeof(unsigned int));
+		unsigned int *index;
+		index = new unsigned int[icount * 3];
+		file.read((char*)&index[0], 4 * (icount * 3));
+
+		for (int i = 0; i < icount * 3; i++)
+		{
+			indexData.push_back(index[i]);
+		}
+
+		file.close();
+
+		delete[] meshname;
+		delete[] index;
+	}
+	D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };
+	vertexBufferData.pSysMem = &vertexData[0];
+	vertexBufferData.SysMemPitch = 0;
+	vertexBufferData.SysMemSlicePitch = 0;
+	CD3D11_BUFFER_DESC vertexBufferDesc(vertexData.size() * sizeof(VertexPositionUVNormal), D3D11_BIND_VERTEX_BUFFER);
+	DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&vertexBufferDesc, &vertexBufferData, &m_vertexBuffer));
+
+	D3D11_SUBRESOURCE_DATA indexBufferData = { 0 };
+	indexBufferData.pSysMem = &indexData[0];
+	indexBufferData.SysMemPitch = 0;
+	indexBufferData.SysMemSlicePitch = 0;
+	CD3D11_BUFFER_DESC indexBufferDesc(indexData.size() * sizeof(unsigned int), D3D11_BIND_INDEX_BUFFER);
+	DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&indexBufferDesc, &indexBufferData, &m_indexBuffer));
+}
+
+void My3DSceneRenderer::CreateCube()
+{
+	static const VertexPositionUVNormal cubeVertices[] =
+	{
+		{ XMFLOAT3(-0.5f, -0.5f, -0.5f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f,0.0f,0.0f) },
+		{ XMFLOAT3(-0.5f, -0.5f,  0.5f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(0.0f,0.0f,0.0f) },
+		{ XMFLOAT3(-0.5f,  0.5f, -0.5f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.0f,0.0f,0.0f) },
+		{ XMFLOAT3(-0.5f,  0.5f,  0.5f), XMFLOAT3(0.0f, 1.0f, 1.0f), XMFLOAT3(0.0f,0.0f,0.0f) },
+		{ XMFLOAT3(0.5f, -0.5f, -0.5f), XMFLOAT3(1.0f, 0.0f, 0.0f),  XMFLOAT3(0.0f,0.0f,0.0f) },
+		{ XMFLOAT3(0.5f, -0.5f,  0.5f), XMFLOAT3(1.0f, 0.0f, 1.0f),  XMFLOAT3(0.0f,0.0f,0.0f) },
+		{ XMFLOAT3(0.5f,  0.5f, -0.5f), XMFLOAT3(1.0f, 1.0f, 0.0f),  XMFLOAT3(0.0f,0.0f,0.0f) },
+		{ XMFLOAT3(0.5f,  0.5f,  0.5f), XMFLOAT3(1.0f, 1.0f, 1.0f),  XMFLOAT3(0.0f,0.0f,0.0f) },
+	};
+
+	D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };
+	vertexBufferData.pSysMem = cubeVertices;
+	vertexBufferData.SysMemPitch = 0;
+	vertexBufferData.SysMemSlicePitch = 0;
+	CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(cubeVertices), D3D11_BIND_VERTEX_BUFFER);
+	DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&vertexBufferDesc, &vertexBufferData, &m_vertexBuffer));
+
+	static const unsigned int cubeIndices[] =
+	{
+		0,1,2, // -x
+		1,3,2,
+
+		4,6,5, // +x
+		5,6,7,
+
+		0,5,1, // -y
+		0,4,5,
+
+		2,7,6, // +y
+		2,3,7,
+
+		0,6,4, // -z
+		0,2,6,
+
+		1,7,3, // +z
+		1,5,7,
+	};
+
+	m_indexCount = ARRAYSIZE(cubeIndices);
+
+	D3D11_SUBRESOURCE_DATA indexBufferData = { 0 };
+	indexBufferData.pSysMem = cubeIndices;
+	indexBufferData.SysMemPitch = 0;
+	indexBufferData.SysMemSlicePitch = 0;
+	CD3D11_BUFFER_DESC indexBufferDesc(sizeof(cubeIndices), D3D11_BIND_INDEX_BUFFER);
 	DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&indexBufferDesc, &indexBufferData, &m_indexBuffer));
 }

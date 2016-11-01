@@ -35,24 +35,25 @@ float4 main(PixelShaderInput input) : SV_TARGET
 {
 	float3 lightDirP = normalize(PointLightPosition - input.WorldPos);
 	float3 lightDirD = normalize(DirectionalLightPostion - input.WorldPos);
-
+	
 	float3 dirp = lightDirP - input.pos.xyz;
 	float dotD = clamp(dot(input.normal, lightDirD), 0, 1);
 	float dotP = clamp(dot(input.normal, dirp), 0, 1);
-
+	
 	float4 dcolor = lerp((DLcolor,1.0f), (0.0f,0.0f,0.0f,0.0f), clamp((dotD + 0.0f), 0, 1));
 	float4 pcolor = lerp((PLcolor,1.0f), (0.0f,0.0f,0.0f,0.0f), dotP);
 	
 	float ATTENUATION = 1.0 - clamp((dirp / lightradius), 0, 1);
-
+	
 	float4 pcolor2 = pcolor * ATTENUATION;
 	float4 combinecolor;// = dcolor + pcolor2;
 	combinecolor.x = clamp((dcolor.x + pcolor2.x), 0, 1);
 	combinecolor.y = clamp((dcolor.y + pcolor2.y), 0, 1);
 	combinecolor.z = clamp((dcolor.z + pcolor2.z), 0, 1);
 	combinecolor.w = clamp((dcolor.w + pcolor2.w), 0, 1);
+	
+	float4 baseColor = diffTexture.Sample(filters[0], input.color.xy) * combinecolor;//combinecolor; // get base color
 
-	float4 baseColor = diffTexture.Sample(filters[0], input.color.xy) * combinecolor; // get base color
 	//float4 addnorm = normTexture.Sample(filters[1], input.color.xy);
 	//float4 addspec = specTexture.Sample(filters[2], input.color.xy);
 
@@ -74,5 +75,5 @@ float4 main(PixelShaderInput input) : SV_TARGET
 	//	(SpecularColor * LightSpecularColor * specLighting * 0.5) // Use light specular vector as intensity multiplier
 	//), texel.w);
 
-	return baseColor; // return a transition based on the detail alpha
+	return baseColor;// baseColor; // return a transition based on the detail alpha
 }
