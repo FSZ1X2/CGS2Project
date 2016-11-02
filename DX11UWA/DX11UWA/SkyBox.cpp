@@ -66,6 +66,7 @@ void SkyBox::CreateWindowSizeDependentResources(void)
 // Called once per frame, rotates the cube and calculates the model and view matrices.
 void SkyBox::Update(DX::StepTimer const& timer)
 {
+	UpdateCamera(timer, 1.0f, 0.75f);
 	if (!m_tracking)
 	{
 		// Convert degrees to radians, then convert seconds to rotation angle
@@ -79,8 +80,6 @@ void SkyBox::Update(DX::StepTimer const& timer)
 
 
 	// Update or move camera here
-	UpdateCamera(timer, 1.0f, 0.75f);
-
 }
 
 // Rotate the 3D cube model a set amount of radians.
