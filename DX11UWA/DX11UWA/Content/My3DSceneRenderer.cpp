@@ -275,10 +275,8 @@ void My3DSceneRenderer::CreateDeviceDependentResources(void)
 	auto createCubeTask = (createPSTask && createVSTask).then([this]()
 	{
 		//LoadMesh("Assets/bench.mesh");
-		CreateModel("Assets/cat.obj");
+		//CreateModel("Assets/cat.obj");
 		//CreateCube();
-		HRESULT hr = CreateDDSTextureFromFile(m_deviceResources->GetD3DDevice(), L"Assets/cat_diff.dds", NULL, m_catdiff.GetAddressOf());
-		DX::ThrowIfFailed(hr);
 		//HRESULT hr1 = CreateDDSTextureFromFile(m_deviceResources->GetD3DDevice(), L"Assets/cat_norm.dds", NULL, m_catnorm.GetAddressOf());
 		//DX::ThrowIfFailed(hr1);
 		//HRESULT hr2 = CreateDDSTextureFromFile(m_deviceResources->GetD3DDevice(), L"Assets/cat_spec.dds", NULL, m_catspec.GetAddressOf());
@@ -428,6 +426,9 @@ void My3DSceneRenderer::CreateModel(const char *path)
 	indexBufferData.SysMemSlicePitch = 0;
 	CD3D11_BUFFER_DESC indexBufferDesc(LoadModelIndex.size()*sizeof(unsigned int), D3D11_BIND_INDEX_BUFFER);
 	DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&indexBufferDesc, &indexBufferData, &m_indexBuffer));
+
+	HRESULT hr = CreateDDSTextureFromFile(m_deviceResources->GetD3DDevice(), L"Assets/cat_diff.dds", NULL, m_catdiff.GetAddressOf());
+	DX::ThrowIfFailed(hr);
 }
 
 void My3DSceneRenderer::LoadMesh(const char *path)
@@ -525,14 +526,24 @@ void My3DSceneRenderer::CreateCube()
 {
 	static const VertexPositionUVNormal cubeVertices[] =
 	{
-		{ XMFLOAT3(-0.5f, -0.5f, -0.5f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f,0.0f,0.0f) },
-		{ XMFLOAT3(-0.5f, -0.5f,  0.5f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(0.0f,0.0f,0.0f) },
-		{ XMFLOAT3(-0.5f,  0.5f, -0.5f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.0f,0.0f,0.0f) },
-		{ XMFLOAT3(-0.5f,  0.5f,  0.5f), XMFLOAT3(0.0f, 1.0f, 1.0f), XMFLOAT3(0.0f,0.0f,0.0f) },
-		{ XMFLOAT3(0.5f, -0.5f, -0.5f), XMFLOAT3(1.0f, 0.0f, 0.0f),  XMFLOAT3(0.0f,0.0f,0.0f) },
-		{ XMFLOAT3(0.5f, -0.5f,  0.5f), XMFLOAT3(1.0f, 0.0f, 1.0f),  XMFLOAT3(0.0f,0.0f,0.0f) },
-		{ XMFLOAT3(0.5f,  0.5f, -0.5f), XMFLOAT3(1.0f, 1.0f, 0.0f),  XMFLOAT3(0.0f,0.0f,0.0f) },
-		{ XMFLOAT3(0.5f,  0.5f,  0.5f), XMFLOAT3(1.0f, 1.0f, 1.0f),  XMFLOAT3(0.0f,0.0f,0.0f) },
+		{ XMFLOAT3(-0.5f, -1.0f, -0.1f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(-0.44f,-0.89f,-0.09f) },
+		{ XMFLOAT3(-0.5f, -1.0f,  0.9f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(-0.35f,-0.7f,0.63f) },
+		{ XMFLOAT3(-0.5f,  0.0f, -0.1f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(-0.9f,0.0f,-0.2f) },
+		{ XMFLOAT3(-0.5f,  0.0f,  0.9f), XMFLOAT3(1.0f, 1.0f, 0.0f), XMFLOAT3(-0.49f,0.0f,0.87f) },
+		{ XMFLOAT3(0.5f, -1.0f, -0.1f), XMFLOAT3(0.0f, 1.0f, 0.0f),  XMFLOAT3(0.44f,-0.89f,-0.09f) },
+		{ XMFLOAT3(0.5f, -1.0f,  0.9f), XMFLOAT3(0.0f, 0.0f, 0.0f),  XMFLOAT3(0.35f,-0.7f,0.63f) },
+		{ XMFLOAT3(0.5f,  0.0f, -0.1f), XMFLOAT3(1.0f, 1.0f, 0.0f),  XMFLOAT3(0.9f,0.0f,-0.2f) },
+		{ XMFLOAT3(0.5f,  0.0f,  0.9f), XMFLOAT3(1.0f, 0.0f, 0.0f),  XMFLOAT3(0.49f,0.0f,0.87f) },
+
+		{ XMFLOAT3(-0.5f, -1.0f, -0.1f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(-0.44f,-0.89f,-0.09f) },
+		{ XMFLOAT3(-0.5f, -1.0f,  0.9f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(-0.35f,-0.7f,0.63f) },
+		{ XMFLOAT3(0.5f, -1.0f, -0.1f), XMFLOAT3(1.0f, 1.0f, 0.0f),  XMFLOAT3(0.44f,-0.89f,-0.09f) },
+		{ XMFLOAT3(0.5f, -1.0f,  0.9f), XMFLOAT3(1.0f, 0.0f, 0.0f),  XMFLOAT3(0.35f,-0.7f,0.63f) },
+
+		{ XMFLOAT3(-0.5f,  0.0f, -0.1f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(-0.9f,0.0f,-0.2f) },
+		{ XMFLOAT3(-0.5f,  0.0f,  0.9f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(-0.49f,0.0f,0.87f) },
+		{ XMFLOAT3(0.5f,  0.0f, -0.1f), XMFLOAT3(1.0f, 1.0f, 0.0f),  XMFLOAT3(0.9f,0.0f,-0.2f) },
+		{ XMFLOAT3(0.5f,  0.0f,  0.9f), XMFLOAT3(1.0f, 0.0f, 0.0f),  XMFLOAT3(0.49f,0.0f,0.87f) },
 	};
 
 	D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };
@@ -550,17 +561,17 @@ void My3DSceneRenderer::CreateCube()
 		4,6,5, // +x
 		5,6,7,
 
-		0,5,1, // -y
-		0,4,5,
-
-		2,7,6, // +y
-		2,3,7,
-
 		0,6,4, // -z
 		0,2,6,
 
 		1,7,3, // +z
 		1,5,7,
+
+		8,9,11, //-y
+		8,11,10,
+
+		12,13,15, //+y
+		12,15,14,
 	};
 
 	m_indexCount = ARRAYSIZE(cubeIndices);
@@ -571,4 +582,7 @@ void My3DSceneRenderer::CreateCube()
 	indexBufferData.SysMemSlicePitch = 0;
 	CD3D11_BUFFER_DESC indexBufferDesc(sizeof(cubeIndices), D3D11_BIND_INDEX_BUFFER);
 	DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&indexBufferDesc, &indexBufferData, &m_indexBuffer));
+
+	HRESULT hr = CreateDDSTextureFromFile(m_deviceResources->GetD3DDevice(), L"Assets/Box_Wood07.dds", NULL, m_catdiff.GetAddressOf());
+	DX::ThrowIfFailed(hr);
 }

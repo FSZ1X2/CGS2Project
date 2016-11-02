@@ -20,7 +20,7 @@ struct PixelShaderInput
 	float4 pos : SV_POSITION;
 	float3 color : UV;
 	float3 normal : NORMAL;
-	float3 WorldPos : WORLDPOS;
+	float4 WorldPos : WORLDPOS;
 };
 
 // Simple shader to do vertex processing on the GPU.
