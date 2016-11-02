@@ -58,6 +58,9 @@
     <ClCompile Include="Content\MyFpsTextRenderer.cpp">
       <Filter>Content</Filter>
     </ClCompile>
+    <ClCompile Include="SkyBox.cpp">
+      <Filter>Content</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DX11UWAMain.h" />
@@ -90,6 +93,9 @@
     <ClInclude Include="Content\MyFpsTextRenderer.h">
       <Filter>Content</Filter>
     </ClInclude>
+    <ClInclude Include="SkyBox.h">
+      <Filter>Content</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\StoreLogo.png">
@@ -110,6 +116,9 @@
     <Image Include="Assets\Box_Wood07.dds">
       <Filter>Assets</Filter>
     </Image>
+    <Image Include="Assets\SunsetSkybox.dds">
+      <Filter>Assets</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />
@@ -122,5 +131,13 @@
     <None Include="Assets\bench.mesh">
       <Filter>Assets</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="PixelShader.hlsl">
+      <Filter>Content</Filter>
+    </FxCompile>
+    <FxCompile Include="VertexShader.hlsl">
+      <Filter>Content</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

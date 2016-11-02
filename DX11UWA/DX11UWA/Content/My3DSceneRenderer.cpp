@@ -431,7 +431,7 @@ void My3DSceneRenderer::CreateModel(const char *path)
 	DX::ThrowIfFailed(hr);
 }
 
-void My3DSceneRenderer::LoadMesh(const char *path)
+/*void My3DSceneRenderer::LoadMesh(const char *path)
 {
 	// TODO: Load mesh data and send it to the graphics card.
 	std::fstream file;
@@ -520,7 +520,7 @@ void My3DSceneRenderer::LoadMesh(const char *path)
 	indexBufferData.SysMemSlicePitch = 0;
 	CD3D11_BUFFER_DESC indexBufferDesc(indexData.size() * sizeof(unsigned int), D3D11_BIND_INDEX_BUFFER);
 	DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&indexBufferDesc, &indexBufferData, &m_indexBuffer));
-}
+}*/
 
 void My3DSceneRenderer::CreateCube()
 {

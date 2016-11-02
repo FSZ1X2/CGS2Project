@@ -31,7 +31,7 @@ namespace DX11UWA
 		//My function:
 		void CreateCube();
 		void CreateModel(const char *path);
-		void LoadMesh(const char *path);
+		//void LoadMesh(const char *path);
 
 	private:
 		void Rotate(float radians);
@@ -68,9 +68,6 @@ namespace DX11UWA
 
 		// Matrix data member for the camera
 		DirectX::XMFLOAT4X4 m_camera;
-
-		//Light stuffs
-		
 
 	};
 }

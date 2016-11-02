@@ -17,9 +17,14 @@ SamplerState filters[3] : register(s0);
 
 static float3 DirectionalLight = { 0.0f,5.0f,0.0f };// : register(l0);
 static float3 PointLightPosition = { 0.0f,0.0f,-1.0f };// : register(l1);
+static float3 SpotLightPosition = { 1.0f,0.0f,0.8f };
 static float3 DLcolor = { 1.0f,1.0f,1.0f };// : register(c0);
 static float3 PLcolor = { 0.0f,0.0f,1.0f };// : register(c1);
+static float3 SLcolor = { 1.0f,0.0f,0.0f };
 static float lightradius = 2.0f;// : register(r0);
+
+static float3 conedir = { 0.0f,0.5f,0.5f };
+static float coneratio = 0.25f;
 
 //float3 LightPosition = { 0.0f,0.0f,0.0f };
 //float3 LightDiffuseColor = { 0.5f,0.5f,0.5f }; // intensity multiplier
@@ -34,19 +39,25 @@ static float lightradius = 2.0f;// : register(r0);
 float4 main(PixelShaderInput input) : SV_TARGET
 {
 	float3 lightDirP = normalize(PointLightPosition - input.WorldPos);
+	float3 LightDirS = normalize(SpotLightPosition - input.WorldPos);
 
 	float dotD = clamp(dot(input.normal, DirectionalLight), 0, 1);
 	float dotP = clamp(dot(input.normal, lightDirP), 0, 1);
+	float dotS = clamp(dot(LightDirS, conedir), 0, 1);
+
+	float spotfactor = (dotS > coneratio) ? 1 : 0;
 	
-	float4 dcolor = float4(DLcolor, 1.0f)*clamp((dotD + 0.2f),0,1);
-	float4 pcolor = float4(PLcolor, 1.0f)*dotP;
+	float3 dcolor = DLcolor *clamp((dotD + 0.2f),0,1);
+	float3 pcolor = PLcolor *dotP;
+	float3 scolor = spotfactor*dotS*SLcolor;
 					
 	float ATTENUATION = 1.0 - clamp((lightDirP / lightradius), 0, 1);
 	
-	float4 pcolor2 = pcolor * ATTENUATION;
-	float4 combinecolor = clamp(dcolor + pcolor2, 0, 1);
+	float3 pcolor2 = pcolor * ATTENUATION;
+	float3 combinecolor = clamp(dcolor + pcolor2 + scolor, 0, 1);
 	
-	float4 baseColor = diffTexture.Sample(filters[0], input.color.xy) * combinecolor; // get base color
+	float3 baseColor = diffTexture.Sample(filters[0], input.color.xy) * combinecolor; // get base color
+	float a = (diffTexture.Sample(filters[0], input.color.xy)).a;
 
 	//float4 addnorm = normTexture.Sample(filters[1], input.color.xy);
 	//float4 addspec = specTexture.Sample(filters[2], input.color.xy);
@@ -67,5 +78,5 @@ float4 main(PixelShaderInput input) : SV_TARGET
 	//	(SpecularColor * LightSpecularColor * specLighting * 0.5) // Use light specular vector as intensity multiplier
 	//), texel.w);
 
-	return baseColor;// baseColor; // return a transition based on the detail alpha
+	return float4(baseColor,a);// baseColor; // return a transition based on the detail alpha
 }

@@ -20,6 +20,7 @@ DX11UWAMain::DX11UWAMain(const std::shared_ptr<DX::DeviceResources>& deviceResou
 	//m_fpsTextRenderer = std::unique_ptr<SampleFpsTextRenderer>(new SampleFpsTextRenderer(m_deviceResources));
 	m_sceneRenderer = std::unique_ptr<My3DSceneRenderer>(new My3DSceneRenderer(m_deviceResources));
 	m_sceneRendererCube = std::unique_ptr<My3DSceneRenderer>(new My3DSceneRenderer(m_deviceResources));
+	m_Skycube = std::unique_ptr<SkyBox>(new SkyBox(m_deviceResources));
 
 	m_fpsTextRenderer = std::unique_ptr<MyFpsTextRenderer>(new MyFpsTextRenderer(m_deviceResources));
 
@@ -44,6 +45,7 @@ void DX11UWAMain::CreateWindowSizeDependentResources(void)
 	// TODO: Replace this with the size-dependent initialization of your app's content.
 	m_sceneRenderer->CreateWindowSizeDependentResources();
 	m_sceneRendererCube->CreateWindowSizeDependentResources();
+	m_Skycube->CreateWindowSizeDependentResources();
 }
 
 // Updates the application state once per frame.
@@ -57,6 +59,8 @@ void DX11UWAMain::Update(void)
 		m_sceneRenderer->SetInputDeviceData(main_kbuttons, main_currentpos);
 		m_sceneRendererCube->Update(m_timer);
 		m_sceneRendererCube->SetInputDeviceData(main_kbuttons, main_currentpos);
+		m_Skycube->Update(m_timer);
+		m_Skycube->SetInputDeviceData(main_kbuttons, main_currentpos);
 		m_fpsTextRenderer->Update(m_timer);
 	});
 }
@@ -84,11 +88,13 @@ bool DX11UWAMain::Render(void)
 	// Clear the back buffer and depth stencil view.
 	context->ClearRenderTargetView(m_deviceResources->GetBackBufferRenderTargetView(), DirectX::Colors::CornflowerBlue);
 	context->ClearDepthStencilView(m_deviceResources->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
+	m_Skycube->Render();
+	context->ClearDepthStencilView(m_deviceResources->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	// Render the scene objects.
 	// TODO: Replace this with your app's content rendering functions.
 	m_sceneRenderer->Render();
 	m_sceneRendererCube->Render();
+	//m_Skycube->Render();
 	m_fpsTextRenderer->Render();
 
 	return true;
@@ -99,6 +105,7 @@ void DX11UWAMain::OnDeviceLost(void)
 {
 	m_sceneRenderer->ReleaseDeviceDependentResources();
 	m_sceneRendererCube->ReleaseDeviceDependentResources();
+	m_Skycube->ReleaseDeviceDependentResources();
 	m_fpsTextRenderer->ReleaseDeviceDependentResources();
 }
 
@@ -107,6 +114,7 @@ void DX11UWAMain::OnDeviceRestored(void)
 {
 	m_sceneRenderer->CreateDeviceDependentResources();
 	m_sceneRendererCube->CreateDeviceDependentResources();
+	m_Skycube->CreateDeviceDependentResources();
 	m_fpsTextRenderer->CreateDeviceDependentResources();
 	CreateWindowSizeDependentResources();
 }
