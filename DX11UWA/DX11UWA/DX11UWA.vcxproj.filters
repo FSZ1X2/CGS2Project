@@ -17,9 +17,6 @@
     <FxCompile Include="Content\SampleVertexShader.hlsl">
       <Filter>Content</Filter>
     </FxCompile>
-    <Image Include="Assets\LockScreenLogo.scale-200.png">
-      <Filter>Assets</Filter>
-    </Image>
     <Image Include="Assets\SplashScreen.scale-200.png">
       <Filter>Assets</Filter>
     </Image>
@@ -119,6 +116,12 @@
     <Image Include="Assets\SunsetSkybox.dds">
       <Filter>Assets</Filter>
     </Image>
+    <Image Include="Assets\palm1.dds">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Box_Circuit.dds">
+      <Filter>Assets</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />
@@ -131,12 +134,21 @@
     <None Include="Assets\bench.mesh">
       <Filter>Assets</Filter>
     </None>
+    <None Include="Assets\palmTree.obj">
+      <Filter>Assets</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelShader.hlsl">
       <Filter>Content</Filter>
     </FxCompile>
     <FxCompile Include="VertexShader.hlsl">
+      <Filter>Content</Filter>
+    </FxCompile>
+    <FxCompile Include="PixelShaderMulti.hlsl">
+      <Filter>Content</Filter>
+    </FxCompile>
+    <FxCompile Include="VertexShaderMulti.hlsl">
       <Filter>Content</Filter>
     </FxCompile>
   </ItemGroup>

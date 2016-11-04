@@ -9,7 +9,7 @@ using namespace DirectX;
 using namespace Windows::Foundation;
 
 // Loads vertex and pixel shaders from files and instantiates the cube geometry.
-My3DSceneRenderer::My3DSceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
+My3DSceneRenderer::My3DSceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources, string pathV, string pathP) :
 	m_loadingComplete(false),
 	m_degreesPerSecond(45),
 	m_indexCount(0),
@@ -21,7 +21,7 @@ My3DSceneRenderer::My3DSceneRenderer(const std::shared_ptr<DX::DeviceResources>&
 	m_prevMousePos = nullptr;
 	memset(&m_camera, 0, sizeof(XMFLOAT4X4));
 
-	CreateDeviceDependentResources();
+	CreateDeviceDependentResources(pathV, pathP);
 	CreateWindowSizeDependentResources();
 }
 
@@ -73,6 +73,7 @@ void My3DSceneRenderer::Update(DX::StepTimer const& timer)
 		double totalRotation = timer.GetTotalSeconds() * radiansPerSecond;
 		float radians = static_cast<float>(fmod(totalRotation, XM_2PI));
 
+		//TransModel(0.0f, 0.0f, 0.0f);
 		Rotate(radians);
 	}
 
@@ -229,8 +230,8 @@ void My3DSceneRenderer::Render(void)
 	context->IASetInputLayout(m_inputLayout.Get());
 	//set texture
 	context->PSSetShaderResources(0, 1, m_catdiff.GetAddressOf());
-	//context->PSSetShaderResources(1, 1, m_catnorm.GetAddressOf());
-	//context->PSSetShaderResources(2, 1, m_catspec.GetAddressOf());
+	context->PSSetShaderResources(1, 1, m_catnorm.GetAddressOf());
+	context->PSSetShaderResources(2, 1, m_catspec.GetAddressOf());
 	// Attach our vertex shader.
 	context->VSSetShader(m_vertexShader.Get(), nullptr, 0);
 	// Send the constant buffer to the graphics device.
@@ -241,11 +242,15 @@ void My3DSceneRenderer::Render(void)
 	context->DrawIndexed(m_indexCount, 0, 0);
 }
 
-void My3DSceneRenderer::CreateDeviceDependentResources(void)
+void My3DSceneRenderer::CreateDeviceDependentResources(string pathV, string pathP)
 {
+	std::wstring V = std::wstring(pathV.begin(), pathV.end());
+	auto loadVSTask = DX::ReadDataAsync(V);
+	std::wstring P = std::wstring(pathP.begin(), pathP.end());
+	auto loadPSTask = DX::ReadDataAsync(P);
 	// Load shaders asynchronously.
-	auto loadVSTask = DX::ReadDataAsync(L"SampleVertexShader.cso");
-	auto loadPSTask = DX::ReadDataAsync(L"SamplePixelShader.cso");
+	//auto loadVSTask = DX::ReadDataAsync(L"SampleVertexShader.cso");
+	//auto loadPSTask = DX::ReadDataAsync(L"SamplePixelShader.cso");
 
 	// After the vertex shader file is loaded, create the shader and input layout.
 	auto createVSTask = loadVSTask.then([this](const std::vector<byte>& fileData)
@@ -274,13 +279,7 @@ void My3DSceneRenderer::CreateDeviceDependentResources(void)
 	// Once both shaders are loaded, create the mesh.
 	auto createCubeTask = (createPSTask && createVSTask).then([this]()
 	{
-		//LoadMesh("Assets/bench.mesh");
-		//CreateModel("Assets/cat.obj");
-		//CreateCube();
-		//HRESULT hr1 = CreateDDSTextureFromFile(m_deviceResources->GetD3DDevice(), L"Assets/cat_norm.dds", NULL, m_catnorm.GetAddressOf());
-		//DX::ThrowIfFailed(hr1);
-		//HRESULT hr2 = CreateDDSTextureFromFile(m_deviceResources->GetD3DDevice(), L"Assets/cat_spec.dds", NULL, m_catspec.GetAddressOf());
-		//DX::ThrowIfFailed(hr2);
+
 	});
 
 	// Once the cube is loaded, the object is ready to be rendered.
@@ -302,7 +301,7 @@ void My3DSceneRenderer::ReleaseDeviceDependentResources(void)
 }
 
 //My function:
-void My3DSceneRenderer::CreateModel(const char *path)
+void My3DSceneRenderer::CreateModel(const char *path, string path2, string path3, string path4)
 {
 	std::vector< unsigned int > vertexIndices, uvIndices, normalIndices;
 	std::vector< XMFLOAT3 > temp_vertices;
@@ -427,8 +426,24 @@ void My3DSceneRenderer::CreateModel(const char *path)
 	CD3D11_BUFFER_DESC indexBufferDesc(LoadModelIndex.size()*sizeof(unsigned int), D3D11_BIND_INDEX_BUFFER);
 	DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&indexBufferDesc, &indexBufferData, &m_indexBuffer));
 
-	HRESULT hr = CreateDDSTextureFromFile(m_deviceResources->GetD3DDevice(), L"Assets/cat_diff.dds", NULL, m_catdiff.GetAddressOf());
+	std::wstring temp = std::wstring(path2.begin(), path2.end());
+	const wchar_t* p = temp.c_str();
+	HRESULT hr = CreateDDSTextureFromFile(m_deviceResources->GetD3DDevice(), p, NULL, m_catdiff.GetAddressOf());
 	DX::ThrowIfFailed(hr);
+	if (path3 != "")
+	{
+		std::wstring temp2 = std::wstring(path3.begin(), path3.end());
+		const wchar_t* p2 = temp2.c_str();
+		HRESULT hr2 = CreateDDSTextureFromFile(m_deviceResources->GetD3DDevice(), p2, NULL, m_catnorm.GetAddressOf());
+		DX::ThrowIfFailed(hr2);
+	}
+	if (path4 != "")
+	{
+		std::wstring temp3 = std::wstring(path4.begin(), path4.end());
+		const wchar_t* p3 = temp3.c_str();
+		HRESULT hr3 = CreateDDSTextureFromFile(m_deviceResources->GetD3DDevice(), p, NULL, m_catspec.GetAddressOf());
+		DX::ThrowIfFailed(hr3);
+	}
 }
 
 /*void My3DSceneRenderer::LoadMesh(const char *path)
@@ -522,7 +537,7 @@ void My3DSceneRenderer::CreateModel(const char *path)
 	DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&indexBufferDesc, &indexBufferData, &m_indexBuffer));
 }*/
 
-void My3DSceneRenderer::CreateCube()
+void My3DSceneRenderer::CreateCube(string path2)
 {
 	static const VertexPositionUVNormal cubeVertices[] =
 	{
@@ -583,6 +598,31 @@ void My3DSceneRenderer::CreateCube()
 	CD3D11_BUFFER_DESC indexBufferDesc(sizeof(cubeIndices), D3D11_BIND_INDEX_BUFFER);
 	DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&indexBufferDesc, &indexBufferData, &m_indexBuffer));
 
-	HRESULT hr = CreateDDSTextureFromFile(m_deviceResources->GetD3DDevice(), L"Assets/Box_Wood07.dds", NULL, m_catdiff.GetAddressOf());
+	std::wstring temp = std::wstring(path2.begin(), path2.end());
+	const wchar_t* p = temp.c_str();
+	HRESULT hr = CreateDDSTextureFromFile(m_deviceResources->GetD3DDevice(), p, NULL, m_catdiff.GetAddressOf());
 	DX::ThrowIfFailed(hr);
+}
+
+void My3DSceneRenderer::ScaleModel(float x, float y, float z)
+{
+	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixScaling(x, y, z)));
+}
+
+void My3DSceneRenderer::TransModel(float x, float y, float z)
+{
+	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixTranslation(x, y, z)));
+}
+
+void My3DSceneRenderer::TranlateModel(float sx, float sy, float sz, float tx, float ty, float tz, DX::StepTimer const& timer, int r)
+{
+	if(r = 0)
+		XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixTranslation(tx, ty, tz)*XMMatrixScaling(sx, sy, sz)));
+	else
+	{
+		float radiansPerSecond = XMConvertToRadians(m_degreesPerSecond);
+		double totalRotation = timer.GetTotalSeconds() * radiansPerSecond;
+		float radians = static_cast<float>(fmod(totalRotation, XM_2PI));
+		XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixTranslation(tx, ty, tz)*XMMatrixScaling(sx, sy, sz)*XMMatrixRotationY(radians)));
+	}
 }
