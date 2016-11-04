@@ -19,7 +19,7 @@ DX11UWAMain::DX11UWAMain(const std::shared_ptr<DX::DeviceResources>& deviceResou
 	//
 	//m_fpsTextRenderer = std::unique_ptr<SampleFpsTextRenderer>(new SampleFpsTextRenderer(m_deviceResources));
 	m_sceneRenderer = std::unique_ptr<My3DSceneRenderer>(new My3DSceneRenderer(m_deviceResources, "VertexShaderMulti.cso", "PixelShaderMulti.cso"));
-	m_sceneRendererCube = std::unique_ptr<My3DSceneRenderer>(new My3DSceneRenderer(m_deviceResources, "SampleVertexShader.cso", "SamplePixelShader.cso"));
+	m_sceneRendererCube = std::unique_ptr<My3DSceneRenderer>(new My3DSceneRenderer(m_deviceResources, "SampleVertexShader.cso", "PixelShaderMultitexture.cso"));
 	m_sceneRendererTree = std::unique_ptr<My3DSceneRenderer>(new My3DSceneRenderer(m_deviceResources, "SampleVertexShader.cso", "SamplePixelShader.cso"));
 	m_Skycube = std::unique_ptr<SkyBox>(new SkyBox(m_deviceResources));
 
@@ -29,7 +29,7 @@ DX11UWAMain::DX11UWAMain(const std::shared_ptr<DX::DeviceResources>& deviceResou
 	// e.g. for 60 FPS fixed timestep update logic, call:
 	m_sceneRenderer->CreateModel("Assets/cat.obj", "Assets/cat_diff.dds", "Assets/cat_norm.dds", "Assets/cat_spec.dds");
 	m_sceneRendererTree->CreateModel("Assets/palmTree.obj", "Assets/palm1.dds","","");
-	m_sceneRendererCube->CreateCube("Assets/Box_Wood07.dds");
+	m_sceneRendererCube->CreateCube("Assets/Box_Wood07.dds","Assets/Box_Circuit.dds");
 	//m_timer.SetFixedTimeStep(true);
 	//m_timer.SetTargetElapsedSeconds(1.0 / 60);
 	
@@ -119,9 +119,9 @@ void DX11UWAMain::OnDeviceLost(void)
 // Notifies renderers that device resources may now be recreated.
 void DX11UWAMain::OnDeviceRestored(void)
 {
-	m_sceneRenderer->CreateDeviceDependentResources("VertexShaderMulti.cso","PixelShaderMulti.cso");
+	m_sceneRenderer->CreateDeviceDependentResources("VertexShaderMulti.cso", "PixelShaderMulti.cso");
 	m_sceneRendererTree->CreateDeviceDependentResources("SampleVertexShader.cso", "SamplePixelShader.cso");
-	m_sceneRendererCube->CreateDeviceDependentResources("SampleVertexShader.cso", "SamplePixelShader.cso");
+	m_sceneRendererCube->CreateDeviceDependentResources("SampleVertexShader.cso", "PixelShaderMultitexture.cso");
 	m_Skycube->CreateDeviceDependentResources();
 	m_fpsTextRenderer->CreateDeviceDependentResources();
 	CreateWindowSizeDependentResources();

@@ -29,11 +29,12 @@ namespace DX11UWA
 		void SetInputDeviceData(const char* kb, const Windows::UI::Input::PointerPoint^ pos);
 
 		//My function:
-		void CreateCube(string path2);
+		void CreateCube(string path2, string path3);
 		void CreateModel(const char *path, string path2, string path3, string path4);
 		void ScaleModel(float x, float y, float z);
 		void TransModel(float x, float y, float z);
 		void TranlateModel(float sx, float sy, float sz, float tx, float ty, float tz, DX::StepTimer const& timer, int r);
+		void Calculatenormal(VertexPositionUVNormal V1, VertexPositionUVNormal V2, VertexPositionUVNormal V3);
 		//void LoadMesh(const char *path);
 
 	private:

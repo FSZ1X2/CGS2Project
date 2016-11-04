@@ -12,6 +12,7 @@ struct VertexShaderInput
 	float3 pos : POSITION;
 	float3 color : UV;
 	float3 normal : NORMAL;
+	float4 tangent : TANGENT;
 };
 
 // Per-pixel color data passed through the pixel shader.
@@ -21,6 +22,8 @@ struct PixelShaderInput
 	float3 color : UV;
 	float3 normal : NORMAL;
 	float4 WorldPos : WORLDPOS;
+	float4 tangent : TANGENT;
+	float4 bitangent : BiTANGENT;
 };
 
 // Simple shader to do vertex processing on the GPU.
@@ -43,6 +46,8 @@ PixelShaderInput main(VertexShaderInput input)
 	//per-pixel light require
 	output.normal = mul(input.normal, model);
 	output.WorldPos = posWorld;
+	output.tangent = mul(float4(input.tangent.xyz * input.tangent.w, 0.0f), model);
+	output.bitangent = mul(float4(cross(input.normal.xyz, input.tangent.xyz), 0.0f), model);
 
 	return output;
 }

@@ -262,6 +262,7 @@ void My3DSceneRenderer::CreateDeviceDependentResources(string pathV, string path
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "UV", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TANGENT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
 
 		DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateInputLayout(vertexDesc, ARRAYSIZE(vertexDesc), &fileData[0], fileData.size(), &m_inputLayout));
@@ -382,6 +383,7 @@ void My3DSceneRenderer::CreateModel(const char *path, string path2, string path3
 		XMFLOAT3 normal = temp_normals[normalIndex - 1];
 		out_normals.push_back(normal);
 	}
+	
 
 	size_t sizeofvertex = out_vertices.size();
 	std::vector< VertexPositionUVNormal > LoadModels;
@@ -401,6 +403,11 @@ void My3DSceneRenderer::CreateModel(const char *path, string path2, string path3
 		LoadModel.normal.z = out_normals[i].z;
 
 		LoadModels.push_back(LoadModel);
+	}
+
+	for (unsigned int i = 0; i < vertexIndices.size(); i+=3)
+	{
+		Calculatenormal(LoadModels[i], LoadModels[i + 1], LoadModels[i + 2]);
 	}
 
 	D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };
@@ -441,7 +448,7 @@ void My3DSceneRenderer::CreateModel(const char *path, string path2, string path3
 	{
 		std::wstring temp3 = std::wstring(path4.begin(), path4.end());
 		const wchar_t* p3 = temp3.c_str();
-		HRESULT hr3 = CreateDDSTextureFromFile(m_deviceResources->GetD3DDevice(), p, NULL, m_catspec.GetAddressOf());
+		HRESULT hr3 = CreateDDSTextureFromFile(m_deviceResources->GetD3DDevice(), p3, NULL, m_catspec.GetAddressOf());
 		DX::ThrowIfFailed(hr3);
 	}
 }
@@ -537,7 +544,7 @@ void My3DSceneRenderer::CreateModel(const char *path, string path2, string path3
 	DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&indexBufferDesc, &indexBufferData, &m_indexBuffer));
 }*/
 
-void My3DSceneRenderer::CreateCube(string path2)
+void My3DSceneRenderer::CreateCube(string path2, string path3)
 {
 	static const VertexPositionUVNormal cubeVertices[] =
 	{
@@ -591,6 +598,11 @@ void My3DSceneRenderer::CreateCube(string path2)
 
 	m_indexCount = ARRAYSIZE(cubeIndices);
 
+	for (unsigned int i = 0; i < m_indexCount; i += 3)
+	{
+		Calculatenormal(cubeVertices[i], cubeVertices[i + 1], cubeVertices[i + 2]);
+	}
+
 	D3D11_SUBRESOURCE_DATA indexBufferData = { 0 };
 	indexBufferData.pSysMem = cubeIndices;
 	indexBufferData.SysMemPitch = 0;
@@ -602,6 +614,13 @@ void My3DSceneRenderer::CreateCube(string path2)
 	const wchar_t* p = temp.c_str();
 	HRESULT hr = CreateDDSTextureFromFile(m_deviceResources->GetD3DDevice(), p, NULL, m_catdiff.GetAddressOf());
 	DX::ThrowIfFailed(hr);
+	if (path3 != "")
+	{
+		std::wstring temp2 = std::wstring(path3.begin(), path3.end());
+		const wchar_t* p2 = temp2.c_str();
+		HRESULT hr2 = CreateDDSTextureFromFile(m_deviceResources->GetD3DDevice(), p2, NULL, m_catnorm.GetAddressOf());
+		DX::ThrowIfFailed(hr2);
+	}
 }
 
 void My3DSceneRenderer::ScaleModel(float x, float y, float z)
@@ -625,4 +644,93 @@ void My3DSceneRenderer::TranlateModel(float sx, float sy, float sz, float tx, fl
 		float radians = static_cast<float>(fmod(totalRotation, XM_2PI));
 		XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixTranslation(tx, ty, tz)*XMMatrixScaling(sx, sy, sz)*XMMatrixRotationY(radians)));
 	}
+}
+
+void My3DSceneRenderer::Calculatenormal(VertexPositionUVNormal V1, VertexPositionUVNormal V2, VertexPositionUVNormal V3)
+{
+	VertexPositionUVNormal vert0 = V1;
+	VertexPositionUVNormal vert1 = V2;
+	VertexPositionUVNormal vert2 = V3;
+	DirectX::XMFLOAT3 vertEdge0;
+	vertEdge0.x = vert1.pos.x - vert0.pos.x;
+	vertEdge0.y = vert1.pos.y - vert0.pos.y;
+	vertEdge0.z = vert1.pos.z - vert0.pos.z;
+	DirectX::XMFLOAT3 vertEdge1;
+	vertEdge1.x = vert2.pos.x - vert0.pos.x;
+	vertEdge1.y = vert2.pos.y - vert0.pos.y;
+	vertEdge1.z = vert2.pos.z - vert0.pos.z;
+
+	DirectX::XMFLOAT3 tex0 = vert0.uv;
+	DirectX::XMFLOAT3 tex1 = vert1.uv;
+	DirectX::XMFLOAT3 tex2 = vert2.uv;
+
+	DirectX::XMFLOAT3 texEdge0;
+	texEdge0.x = tex1.x - tex0.x;
+	texEdge0.y = tex1.y - tex0.y;
+	texEdge0.z = tex1.z - tex0.z;
+	DirectX::XMFLOAT3 texEdge1;
+	texEdge1.x = tex2.x - tex1.x;
+	texEdge1.y = tex2.y - tex1.y;
+	texEdge1.z = tex2.z - tex1.z;
+
+	float ratio = 1.0f / (texEdge0.x * texEdge1.y - texEdge1.x * texEdge0.y);
+	DirectX::XMFLOAT3 uDirection = DirectX::XMFLOAT3((texEdge1.y * vertEdge0.x - texEdge0.y * vertEdge1.x) * ratio, (texEdge1.y * vertEdge0.y - texEdge0.y * vertEdge1.y) * ratio, (texEdge1.y * vertEdge0.z - texEdge0.y * vertEdge1.z) * ratio);
+	DirectX::XMFLOAT3 vDirection = DirectX::XMFLOAT3((texEdge0.x * vertEdge1.x - texEdge1.x * vertEdge0.x) * ratio, (texEdge0.x * vertEdge1.y - texEdge1.x * vertEdge0.y) * ratio, (texEdge0.x * vertEdge1.z - texEdge1.x * vertEdge0.z) * ratio);
+
+	float lenuD = sqrt((uDirection.x * uDirection.x) + (uDirection.y * uDirection.y) + (uDirection.z * uDirection.z));
+	uDirection.x = uDirection.x / lenuD;
+	uDirection.y = uDirection.y / lenuD;
+	uDirection.z = uDirection.z / lenuD;
+	float dotResult1 = vert0.normal.x*uDirection.x + vert0.normal.y*uDirection.y + vert0.normal.z*uDirection.z;
+	float dotResult2 = vert1.normal.x*uDirection.x + vert1.normal.y*uDirection.y + vert1.normal.z*uDirection.z;
+	float dotResult3 = vert2.normal.x*uDirection.x + vert2.normal.y*uDirection.y + vert2.normal.z*uDirection.z;
+	DirectX::XMFLOAT4 Tangent1, Tangent2, Tangent3;
+	Tangent1.x = uDirection.x - vert0.normal.x * dotResult1;
+	Tangent2.x = uDirection.x - vert1.normal.x * dotResult2;
+	Tangent3.x = uDirection.x - vert2.normal.x * dotResult3;
+
+	Tangent1.y = uDirection.y - vert0.normal.y * dotResult1;
+	Tangent2.y = uDirection.y - vert1.normal.y * dotResult2;
+	Tangent3.y = uDirection.y - vert2.normal.y * dotResult3;
+
+	Tangent1.z = uDirection.z - vert0.normal.z * dotResult1;
+	Tangent2.z = uDirection.z - vert1.normal.z * dotResult2;
+	Tangent3.z = uDirection.z - vert2.normal.z * dotResult3;
+
+	float lenT1 = sqrt((Tangent1.x * Tangent1.x) + (Tangent1.y * Tangent1.y) + (Tangent1.z * Tangent1.z));
+	float lenT2 = sqrt((Tangent2.x * Tangent2.x) + (Tangent2.y * Tangent2.y) + (Tangent2.z * Tangent2.z));
+	float lenT3 = sqrt((Tangent3.x * Tangent3.x) + (Tangent3.y * Tangent3.y) + (Tangent3.z * Tangent3.z));
+
+	Tangent1.x = Tangent1.x / lenT1;
+	Tangent1.y = Tangent1.y / lenT1;
+	Tangent1.z = Tangent1.z / lenT1;
+
+	Tangent2.x = Tangent2.x / lenT1;
+	Tangent2.y = Tangent2.y / lenT1;
+	Tangent2.z = Tangent2.z / lenT1;
+
+	Tangent3.x = Tangent3.x / lenT1;
+	Tangent3.y = Tangent3.y / lenT1;
+	Tangent3.z = Tangent3.z / lenT1;
+
+	float lenvD = sqrt((uDirection.x * uDirection.x) + (uDirection.y * uDirection.y) + (uDirection.z * uDirection.z));
+	vDirection.x = vDirection.x / lenvD;
+	vDirection.y = vDirection.y / lenvD;
+	vDirection.z = vDirection.z / lenvD;
+
+	DirectX::XMVECTOR cross1 = DirectX::XMVector3Cross(XMLoadFloat3(&vert0.normal), XMLoadFloat3(&uDirection));
+	DirectX::XMVECTOR cross2 = DirectX::XMVector3Cross(XMLoadFloat3(&vert1.normal), XMLoadFloat3(&uDirection));
+	DirectX::XMVECTOR cross3 = DirectX::XMVector3Cross(XMLoadFloat3(&vert2.normal), XMLoadFloat3(&uDirection));
+	DirectX::XMFLOAT3 handedness = vDirection;
+	float dotResultv1 = DirectX::XMVectorGetX(DirectX::XMVector3Dot(cross1, XMLoadFloat3(&handedness)));
+	float dotResultv2 = DirectX::XMVectorGetX(DirectX::XMVector3Dot(cross2, XMLoadFloat3(&handedness)));
+	float dotResultv3 = DirectX::XMVectorGetX(DirectX::XMVector3Dot(cross3, XMLoadFloat3(&handedness)));
+
+	Tangent1.w = (dotResultv1 < 0.0f) ? -1.0f : 1.0f;
+	Tangent2.w = (dotResultv2 < 0.0f) ? -1.0f : 1.0f;
+	Tangent3.w = (dotResultv3 < 0.0f) ? -1.0f : 1.0f;
+
+	V1.tangent = Tangent1;
+	V2.tangent = Tangent2;
+	V3.tangent = Tangent3;
 }

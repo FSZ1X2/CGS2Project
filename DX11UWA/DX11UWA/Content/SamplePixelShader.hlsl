@@ -56,7 +56,7 @@ float4 main(PixelShaderInput input) : SV_TARGET
 	float3 pcolor2 = pcolor * ATTENUATION;
 	float3 combinecolor = clamp(dcolor + pcolor2 + scolor, 0, 1);
 	
-	float3 baseColor = diffTexture.Sample(filters[0], input.color.xy);// *combinecolor;
+	float3 baseColor = diffTexture.Sample(filters[0], input.color.xy) *combinecolor;
 	float a = (diffTexture.Sample(filters[0], input.color.xy)).a;
 	if (a < 0.5)
 		discard;
