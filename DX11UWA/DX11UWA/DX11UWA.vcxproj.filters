@@ -107,9 +107,6 @@
     <Image Include="Assets\cat_spec.dds">
       <Filter>Assets</Filter>
     </Image>
-    <Image Include="Assets\benchwhite.dds">
-      <Filter>Assets</Filter>
-    </Image>
     <Image Include="Assets\Box_Wood07.dds">
       <Filter>Assets</Filter>
     </Image>
@@ -125,6 +122,12 @@
     <Image Include="Assets\7259d9158be0b7e8c62c887fac57ed81.dds">
       <Filter>Assets</Filter>
     </Image>
+    <Image Include="Assets\armchair_n.dds">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\armchair_d.dds">
+      <Filter>Assets</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />
@@ -134,27 +137,27 @@
     <None Include="Assets\cat.obj">
       <Filter>Assets</Filter>
     </None>
-    <None Include="Assets\bench.mesh">
+    <None Include="Assets\palmTree.obj">
       <Filter>Assets</Filter>
     </None>
-    <None Include="Assets\palmTree.obj">
+    <None Include="Assets\armchair.obj">
       <Filter>Assets</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="PixelShader.hlsl">
-      <Filter>Content</Filter>
-    </FxCompile>
-    <FxCompile Include="VertexShader.hlsl">
-      <Filter>Content</Filter>
-    </FxCompile>
-    <FxCompile Include="PixelShaderMulti.hlsl">
-      <Filter>Content</Filter>
-    </FxCompile>
     <FxCompile Include="VertexShaderMulti.hlsl">
       <Filter>Content</Filter>
     </FxCompile>
     <FxCompile Include="PixelShaderMultitexture.hlsl">
+      <Filter>Content</Filter>
+    </FxCompile>
+    <FxCompile Include="PixelShaderSkyBox.hlsl">
+      <Filter>Content</Filter>
+    </FxCompile>
+    <FxCompile Include="VertexShaderSkyBox.hlsl">
+      <Filter>Content</Filter>
+    </FxCompile>
+    <FxCompile Include="PixelShaderNorm.hlsl">
       <Filter>Content</Filter>
     </FxCompile>
   </ItemGroup>

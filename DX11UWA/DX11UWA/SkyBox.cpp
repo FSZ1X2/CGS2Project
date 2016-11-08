@@ -241,8 +241,8 @@ void SkyBox::Render(void)
 void SkyBox::CreateDeviceDependentResources(void)
 {
 	// Load shaders asynchronously.
-	auto loadVSTask = DX::ReadDataAsync(L"VertexShader.cso");
-	auto loadPSTask = DX::ReadDataAsync(L"PixelShader.cso");
+	auto loadVSTask = DX::ReadDataAsync(L"VertexShaderSkyBox.cso");
+	auto loadPSTask = DX::ReadDataAsync(L"PixelShaderSkyBox.cso");
 
 	// After the vertex shader file is loaded, create the shader and input layout.
 	auto createVSTask = loadVSTask.then([this](const std::vector<byte>& fileData)

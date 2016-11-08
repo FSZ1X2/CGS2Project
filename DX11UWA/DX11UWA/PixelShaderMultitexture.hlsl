@@ -51,7 +51,7 @@ float4 main(PixelShaderInput input) : SV_TARGET
 	float3 dc = diffTexture.Sample(filters[0], input.color.xy);
 	float3 nc = normTexture.Sample(filters[1], input.color.xy);
 	float3 sc = specTexture.Sample(filters[2], input.color.xy);
-	float3 basec = saturate(dc*nc);//dc*0.5*sc*0.5
+	float3 basec = dc*0.5+nc*0.3;//saturate(dc*nc);//dc*0.5*sc*0.5
 	baseColor = basec * combinecolor;
 	float a = (diffTexture.Sample(filters[0], input.color.xy)).a;
 	if (a < 0.5)
