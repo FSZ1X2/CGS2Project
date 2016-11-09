@@ -1,0 +1,9 @@
+--for requirement 19 multitexture: I made multitexture on my ground (2 texture on ground)
+
+--for requirement 24 : the leaf of tree is using masking
+
+--for requirement 34,35,36: 
+directionl light: hold "1" and press IKJLOU for moving
+point light: hold "2" and press IKJLOU for moving
+spot light position: hold "3" and press IKJLOU for moving
+spot light direction: hold "4" and press IKJLOU for moving
