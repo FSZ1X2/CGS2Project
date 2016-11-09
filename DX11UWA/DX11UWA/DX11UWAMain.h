@@ -42,6 +42,8 @@ namespace DX11UWA
 
 		std::unique_ptr<My3DSceneRenderer> m_sceneRendererTree;
 
+		std::unique_ptr<My3DSceneRenderer> m_sceneRendererGround;
+
 
 		std::unique_ptr<SkyBox> m_Skycube;
 

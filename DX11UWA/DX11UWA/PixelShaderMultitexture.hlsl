@@ -50,15 +50,15 @@ SamplerState filters[3] : register(s0);
 // A pass-through function for the (interpolated) color data.
 float4 main(PixelShaderInput input) : SV_TARGET
 {
-	float3 lightDirP = normalize(PointLightPosition.xyz - input.WorldPos);
-	float3 LightDirS = normalize(SpotLightPosition.xyz - input.WorldPos);
+	float3 lightDirP = normalize(PointLightPosition.xyz - input.WorldPos.xyz);
+	float3 LightDirS = normalize(SpotLightPosition.xyz - input.WorldPos.xyz);
 
 	float dotD = clamp(dot(input.normal, normalize(DirectionalLight.xyz)), 0, 1);
 	float dotP = clamp(dot(input.normal, lightDirP), 0, 1);
 	float dotS = clamp(dot(-LightDirS, normalize(conedir.xyz)), 0, 1);
 
 	float spotfactor = (dotS > coneratio.x) ? 1 : 0;
-	spotfactor *= clamp(dot(LightDirS, input.normal), 0, 1);
+	spotfactor *= clamp(dot(LightDirS, normalize(input.normal)), 0, 1);
 
 	float3 dcolor = DLcolor.xyz *clamp((dotD + 0.2f),0,1);
 	float3 pcolor = PLcolor.xyz *dotP;

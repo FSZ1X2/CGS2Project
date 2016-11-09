@@ -579,24 +579,24 @@ void My3DSceneRenderer::CreateCube(string path2, string path3)
 {
 	static const VertexPositionUVNormal cubeVertices[] =
 	{
-		{ XMFLOAT3(-0.5f, -1.0f, -0.1f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(-0.44f,-0.89f,-0.09f) },
-		{ XMFLOAT3(-0.5f, -1.0f,  0.9f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(-0.35f,-0.7f,0.63f) },
-		{ XMFLOAT3(-0.5f,  0.0f, -0.1f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(-0.9f,0.0f,-0.2f) },
-		{ XMFLOAT3(-0.5f,  0.0f,  0.9f), XMFLOAT3(1.0f, 1.0f, 0.0f), XMFLOAT3(-0.49f,0.0f,0.87f) },
-		{ XMFLOAT3(0.5f, -1.0f, -0.1f), XMFLOAT3(0.0f, 1.0f, 0.0f),  XMFLOAT3(0.44f,-0.89f,-0.09f) },
-		{ XMFLOAT3(0.5f, -1.0f,  0.9f), XMFLOAT3(0.0f, 0.0f, 0.0f),  XMFLOAT3(0.35f,-0.7f,0.63f) },
-		{ XMFLOAT3(0.5f,  0.0f, -0.1f), XMFLOAT3(1.0f, 1.0f, 0.0f),  XMFLOAT3(0.9f,0.0f,-0.2f) },
-		{ XMFLOAT3(0.5f,  0.0f,  0.9f), XMFLOAT3(1.0f, 0.0f, 0.0f),  XMFLOAT3(0.49f,0.0f,0.87f) },
+		{ XMFLOAT3(-0.5f, -1.0f, -0.1f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(-1,0,0) },
+		{ XMFLOAT3(-0.5f, -1.0f,  0.9f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(-1,0,0) },
+		{ XMFLOAT3(-0.5f,  0.0f, -0.1f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(-1,0,0) },
+		{ XMFLOAT3(-0.5f,  0.0f,  0.9f), XMFLOAT3(1.0f, 1.0f, 0.0f), XMFLOAT3(-1,0,0) },
+		{ XMFLOAT3(0.5f, -1.0f, -0.1f), XMFLOAT3(0.0f, 1.0f, 0.0f),  XMFLOAT3(1,0,0) },
+		{ XMFLOAT3(0.5f, -1.0f,  0.9f), XMFLOAT3(0.0f, 0.0f, 0.0f),  XMFLOAT3(1,0,0) },
+		{ XMFLOAT3(0.5f,  0.0f, -0.1f), XMFLOAT3(1.0f, 1.0f, 0.0f),  XMFLOAT3(1,0,0) },
+		{ XMFLOAT3(0.5f,  0.0f,  0.9f), XMFLOAT3(1.0f, 0.0f, 0.0f),  XMFLOAT3(1,0,0) },
 
-		{ XMFLOAT3(-0.5f, -1.0f, -0.1f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(-0.44f,-0.89f,-0.09f) },
-		{ XMFLOAT3(-0.5f, -1.0f,  0.9f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(-0.35f,-0.7f,0.63f) },
-		{ XMFLOAT3(0.5f, -1.0f, -0.1f), XMFLOAT3(1.0f, 1.0f, 0.0f),  XMFLOAT3(0.44f,-0.89f,-0.09f) },
-		{ XMFLOAT3(0.5f, -1.0f,  0.9f), XMFLOAT3(1.0f, 0.0f, 0.0f),  XMFLOAT3(0.35f,-0.7f,0.63f) },
+		{ XMFLOAT3(-0.5f, -1.0f, -0.1f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0,-1,0) },
+		{ XMFLOAT3(-0.5f, -1.0f,  0.9f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0,-1,0) },
+		{ XMFLOAT3(0.5f, -1.0f, -0.1f), XMFLOAT3(1.0f, 1.0f, 0.0f),  XMFLOAT3(0,-1,0) },
+		{ XMFLOAT3(0.5f, -1.0f,  0.9f), XMFLOAT3(1.0f, 0.0f, 0.0f),  XMFLOAT3(0,-1,0) },
 
-		{ XMFLOAT3(-0.5f,  0.0f, -0.1f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(-0.9f,0.0f,-0.2f) },
-		{ XMFLOAT3(-0.5f,  0.0f,  0.9f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(-0.49f,0.0f,0.87f) },
-		{ XMFLOAT3(0.5f,  0.0f, -0.1f), XMFLOAT3(1.0f, 1.0f, 0.0f),  XMFLOAT3(0.9f,0.0f,-0.2f) },
-		{ XMFLOAT3(0.5f,  0.0f,  0.9f), XMFLOAT3(1.0f, 0.0f, 0.0f),  XMFLOAT3(0.49f,0.0f,0.87f) },
+		{ XMFLOAT3(-0.5f,  0.0f, -0.1f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0,1,0) },
+		{ XMFLOAT3(-0.5f,  0.0f,  0.9f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0,1,0) },
+		{ XMFLOAT3(0.5f,  0.0f, -0.1f), XMFLOAT3(1.0f, 1.0f, 0.0f),  XMFLOAT3(0,1,0) },
+		{ XMFLOAT3(0.5f,  0.0f,  0.9f), XMFLOAT3(1.0f, 0.0f, 0.0f),  XMFLOAT3(0,1,0) },
 	};
 
 	D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };
@@ -768,7 +768,7 @@ void My3DSceneRenderer::Calculatenormal(VertexPositionUVNormal V1, VertexPositio
 
 void My3DSceneRenderer::CreateDirectionalLight()
 {
-	m_dcfd.direction = { 0.0f,5.0f,0.0f,0.0f };
+	m_dcfd.direction = { -5.0f,2.0f,0.0f,0.0f };
 	m_dcfd.Dcolor = { 1.0f,1.0f,1.0f,1.0f };
 }
 void My3DSceneRenderer::CreatePointLight()
@@ -779,16 +779,30 @@ void My3DSceneRenderer::CreatePointLight()
 }
 void My3DSceneRenderer::CreateSpotLight()
 {
-	m_scfd.Spotpos = { -10.0f,0.0f,0.0f,0.0f };
+	m_scfd.Spotpos = { 0.0f,2.0f,0.0f,0.0f };
 	m_scfd.Scolor = { 1.0f,0.0f,0.0f,0.0f };
-	m_scfd.conedir = { 0.0f,-5.0f,-5.0f,0.0f };
-	m_scfd.coneratio = { 0.5f,0.0f,0.0f,0.0f };
+	m_scfd.conedir = { 0.0f,-1.0f,0.0f,0.0f };
+	m_scfd.coneratio = { 0.8f,0.0f,0.0f,0.0f };
 }
 
 void My3DSceneRenderer::UpdataLight(DX::StepTimer const& timer, float const moveSpd, float const rotSpd)
 {
 	const float delta_time = (float)timer.GetElapsedSeconds();
 
+	//if (m_dcfd.direction.z < 10)
+	//	m_dcfd.direction.z += moveSpd * delta_time;
+	//else
+	//	m_dcfd.direction.z += -moveSpd * delta_time;
+
+	//if (m_pcfd.Pointpos.z < 10)
+	//	m_pcfd.Pointpos.z += moveSpd * delta_time;
+	//else
+	//	m_pcfd.Pointpos.z += -moveSpd * delta_time;
+
+	//if (m_scfd.Spotpos.z < 10)
+	//	m_scfd.Spotpos.z += moveSpd * delta_time;
+	//else
+	//	m_scfd.Spotpos.z += -moveSpd * delta_time;
 	//directional:
 	if (m_kbuttons['I']&& m_kbuttons['1'])
 	{
@@ -891,5 +905,55 @@ void My3DSceneRenderer::UpdataLight(DX::StepTimer const& timer, float const move
 	if (m_kbuttons['O'] && m_kbuttons['4'])
 	{
 		m_scfd.conedir.y += moveSpd * delta_time;
+	}
+}
+
+void My3DSceneRenderer::CreateGround(string path2, string path3)
+{
+	static const VertexPositionUVNormal cubeVertices[] =
+	{
+		{ XMFLOAT3(-0.5f, -1.0f, -0.1f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0,1,0) },
+		{ XMFLOAT3(-0.5f, -1.0f,  0.9f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0,1,0) },
+		{ XMFLOAT3(0.5f, -1.0f, -0.1f), XMFLOAT3(1.0f, 1.0f, 0.0f),  XMFLOAT3(0,1,0) },
+		{ XMFLOAT3(0.5f, -1.0f,  0.9f), XMFLOAT3(1.0f, 0.0f, 0.0f),  XMFLOAT3(0,1,0) },
+	};
+
+	D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };
+	vertexBufferData.pSysMem = cubeVertices;
+	vertexBufferData.SysMemPitch = 0;
+	vertexBufferData.SysMemSlicePitch = 0;
+	CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(cubeVertices), D3D11_BIND_VERTEX_BUFFER);
+	DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&vertexBufferDesc, &vertexBufferData, &m_vertexBuffer));
+
+	static const unsigned int cubeIndices[] =
+	{
+		0,1,3, //-y
+		0,3,2,
+	};
+
+	m_indexCount = ARRAYSIZE(cubeIndices);
+
+	for (unsigned int i = 0; i < m_indexCount; i += 3)
+	{
+		Calculatenormal(cubeVertices[i], cubeVertices[i + 1], cubeVertices[i + 2]);
+	}
+
+	D3D11_SUBRESOURCE_DATA indexBufferData = { 0 };
+	indexBufferData.pSysMem = cubeIndices;
+	indexBufferData.SysMemPitch = 0;
+	indexBufferData.SysMemSlicePitch = 0;
+	CD3D11_BUFFER_DESC indexBufferDesc(sizeof(cubeIndices), D3D11_BIND_INDEX_BUFFER);
+	DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&indexBufferDesc, &indexBufferData, &m_indexBuffer));
+
+	std::wstring temp = std::wstring(path2.begin(), path2.end());
+	const wchar_t* p = temp.c_str();
+	HRESULT hr = CreateDDSTextureFromFile(m_deviceResources->GetD3DDevice(), p, NULL, m_catdiff.GetAddressOf());
+	DX::ThrowIfFailed(hr);
+	if (path3 != "")
+	{
+		std::wstring temp2 = std::wstring(path3.begin(), path3.end());
+		const wchar_t* p2 = temp2.c_str();
+		HRESULT hr2 = CreateDDSTextureFromFile(m_deviceResources->GetD3DDevice(), p2, NULL, m_catnorm.GetAddressOf());
+		DX::ThrowIfFailed(hr2);
 	}
 }

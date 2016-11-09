@@ -122,6 +122,9 @@
     <Image Include="Assets\7259d9158be0b7e8c62c887fac57ed81.dds">
       <Filter>Assets</Filter>
     </Image>
+    <Image Include="Assets\grass_seamless.dds">
+      <Filter>Assets</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />

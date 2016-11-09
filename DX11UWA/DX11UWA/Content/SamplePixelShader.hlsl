@@ -67,7 +67,7 @@ float4 main(PixelShaderInput input) : SV_TARGET
 	float dotS = clamp(dot(-LightDirS, normalize(conedir.xyz)), 0, 1);
 
 	float spotfactor = (dotS > coneratio.x) ? 1 : 0;
-	spotfactor *= clamp(dot(LightDirS, input.normal), 0, 1);
+	spotfactor *= clamp(dot(LightDirS, normalize(input.normal)), 0, 1);
 	
 	float3 dcolor = DLcolor.xyz *clamp((dotD + 0.2f),0,1);
 	float3 pcolor = PLcolor.xyz *dotP;

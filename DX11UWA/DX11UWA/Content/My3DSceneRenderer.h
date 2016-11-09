@@ -30,6 +30,7 @@ namespace DX11UWA
 
 		//My function:
 		void CreateCube(string path2, string path3);
+		void CreateGround(string path2, string path3);
 		void CreateModel(const char *path, string path2, string path3, string path4);
 		void ScaleModel(float x, float y, float z);
 		void TransModel(float x, float y, float z);

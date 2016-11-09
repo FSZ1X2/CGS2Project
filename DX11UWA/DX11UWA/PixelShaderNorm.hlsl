@@ -67,7 +67,7 @@ float4 main(PixelShaderInput input) : SV_TARGET
 	TBN[1] = bitangento.xyz;
 	TBN[2] = normalo.xyz;
 
-	newNormal = mul(newNormal, TBN);
+	newNormal = normalize(mul(newNormal, TBN));
 
 	float3 lightDirP = normalize(PointLightPosition.xyz - input.WorldPos);
 	float3 LightDirS = normalize(SpotLightPosition.xyz - input.WorldPos);
