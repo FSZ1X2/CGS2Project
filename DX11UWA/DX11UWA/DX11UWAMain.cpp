@@ -32,7 +32,6 @@ DX11UWAMain::DX11UWAMain(const std::shared_ptr<DX::DeviceResources>& deviceResou
 	m_sceneRendererCube->CreateCube("Assets/Box_Wood07.dds","Assets/Box_Circuit.dds");
 	//m_timer.SetFixedTimeStep(true);
 	//m_timer.SetTargetElapsedSeconds(1.0 / 60);
-	
 }
 
 DX11UWAMain::~DX11UWAMain(void)
@@ -64,9 +63,9 @@ void DX11UWAMain::Update(void)
 		m_sceneRendererCube->Update(m_timer);
 		m_sceneRendererCube->TranlateModel(10.0f, 10.0f, 10.0f, 0.0f, 0.0f, 0.0f, m_timer, 0);
 		m_sceneRendererCube->SetInputDeviceData(main_kbuttons, main_currentpos);
-		//m_sceneRendererTree->Update(m_timer);
-		//m_sceneRendererTree->TranlateModel(0.1f, 0.1f, 0.1f, -4.0f, 0.0f, 5.0f, m_timer, 0);
-		//m_sceneRendererTree->SetInputDeviceData(main_kbuttons, main_currentpos);
+		m_sceneRendererTree->Update(m_timer);
+		m_sceneRendererTree->TranlateModel(1.0f, 1.0f, 1.0f, -4.0f, 0.0f, 5.0f, m_timer, 0);
+		m_sceneRendererTree->SetInputDeviceData(main_kbuttons, main_currentpos);
 		m_Skycube->Update(m_timer);
 		m_Skycube->SetInputDeviceData(main_kbuttons, main_currentpos);
 		m_fpsTextRenderer->Update(m_timer);
@@ -121,7 +120,7 @@ void DX11UWAMain::OnDeviceLost(void)
 // Notifies renderers that device resources may now be recreated.
 void DX11UWAMain::OnDeviceRestored(void)
 {
-	m_sceneRenderer->CreateDeviceDependentResources("VertexShaderMulti.cso", "PixelShaderMulti.cso");
+	m_sceneRenderer->CreateDeviceDependentResources("VertexShaderMulti.cso", "PixelShaderNorm.cso");
 	m_sceneRendererTree->CreateDeviceDependentResources("SampleVertexShader.cso", "SamplePixelShader.cso");
 	m_sceneRendererCube->CreateDeviceDependentResources("SampleVertexShader.cso", "PixelShaderMultitexture.cso");
 	m_Skycube->CreateDeviceDependentResources();
