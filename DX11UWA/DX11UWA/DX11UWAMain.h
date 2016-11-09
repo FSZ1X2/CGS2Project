@@ -41,7 +41,6 @@ namespace DX11UWA
 		std::unique_ptr<MyFpsTextRenderer> m_fpsTextRenderer;
 
 		std::unique_ptr<My3DSceneRenderer> m_sceneRendererTree;
-		std::unique_ptr<My3DSceneRenderer> m_sceneRendererArmchair;
 
 
 		std::unique_ptr<SkyBox> m_Skycube;
