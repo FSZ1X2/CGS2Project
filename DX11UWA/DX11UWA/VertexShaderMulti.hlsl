@@ -6,6 +6,27 @@ cbuffer ModelViewProjectionConstantBuffer : register(b0)
 	matrix projection;
 };
 
+//cbuffer DirectionalLightConstantBuffer : register(b1)
+//{
+//	float3 direction;
+//	float3 Dcolor;
+//};
+//
+//cbuffer PointLightConstantBuffer : register(b2)
+//{
+//	float3 Pointpos;
+//	float3 Pcolor;
+//	float lightradius;
+//};
+//
+//cbuffer SpotLightConstantBuffer : register(b3)
+//{
+//	float3 Spopos;
+//	float3 Scolor;
+//	float3 conedir;
+//	float coneratio;
+//};
+
 // Per-vertex data used as input to the vertex shader.
 struct VertexShaderInput
 {
@@ -24,6 +45,16 @@ struct PixelShaderInput
 	float4 WorldPos : WORLDPOS;
 	float4 tangent : TANGENT;
 	float4 bitangent : BiTANGENT;
+
+	//float3 DirectionalLight : DirectionalLight;
+	//float3 DLcolor : DLcolor;
+	//float3 PointLightPosition : PointLightPosition;
+	//float3 PLcolor : PLcolor;
+	//float Lightradius : lightradius;
+	//float3 SpotLightPosition : SpotLightPosition;
+	//float3 SLcolor : Slcolor;
+	//float3 Conedir : CONDIR;
+	//float Coneratio : CONRATIO;
 };
 
 // Simple shader to do vertex processing on the GPU.
@@ -48,6 +79,16 @@ PixelShaderInput main(VertexShaderInput input)
 	output.WorldPos = posWorld;
 	output.tangent = mul(float4(input.tangent.xyz * input.tangent.w, 0.0f), model);
 	output.bitangent = mul(float4(cross(input.normal.xyz, input.tangent.xyz), 0.0f), model);
+
+	//output.DirectionalLight= direction;
+	//output.DLcolor = Dcolor;
+	//output.PointLightPosition = Pointpos;
+	//output.PLcolor  = Pcolor;
+	//output.Lightradius  = lightradius;
+	//output.SpotLightPosition= Spopos;
+	//output.SLcolor = Scolor;
+	//output.Conedir = conedir;
+	//output.Coneratio  =coneratio;
 
 	return output;
 }

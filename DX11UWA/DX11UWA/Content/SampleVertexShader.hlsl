@@ -6,6 +6,27 @@ cbuffer ModelViewProjectionConstantBuffer : register(b0)
 	matrix projection;
 };
 
+//cbuffer DirectionalLightConstantBuffer : register(b1)
+//{
+//	float3 direction;
+//	float3 Dcolor;
+//};
+//
+//cbuffer PointLightConstantBuffer : register(b2)
+//{
+//	float3 Pointpos;
+//	float3 Pcolor;
+//	float lightradius;
+//};
+//
+//cbuffer SpotLightConstantBuffer : register(b3)
+//{
+//	float3 Spopos;
+//	float3 Scolor;
+//	float3 conedir;
+//	float coneratio;
+//};
+
 // Per-vertex data used as input to the vertex shader.
 struct VertexShaderInput
 {

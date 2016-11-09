@@ -24,4 +24,25 @@ namespace DX11UWA
 		DirectX::XMFLOAT3 normal;
 		DirectX::XMFLOAT4 tangent;
 	};
+
+	struct DirectionalLightConstantBuffer
+	{
+		DirectX::XMFLOAT4 direction;
+		DirectX::XMFLOAT4 Dcolor;
+	};
+
+	struct PointLightConstantBuffer
+	{
+		DirectX::XMFLOAT4 Pointpos;
+		DirectX::XMFLOAT4 Pcolor;
+		DirectX::XMFLOAT4 lightradius;
+	};
+
+	struct SpotLightConstantBuffer
+	{
+		DirectX::XMFLOAT4 Spotpos;
+		DirectX::XMFLOAT4 Scolor;
+		DirectX::XMFLOAT4 conedir;
+		DirectX::XMFLOAT4 coneratio;
+	};
 }

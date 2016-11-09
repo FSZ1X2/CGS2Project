@@ -58,6 +58,7 @@
     <ClCompile Include="SkyBox.cpp">
       <Filter>Content</Filter>
     </ClCompile>
+    <ClCompile Include="Light.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DX11UWAMain.h" />
@@ -93,6 +94,7 @@
     <ClInclude Include="SkyBox.h">
       <Filter>Content</Filter>
     </ClInclude>
+    <ClInclude Include="Light.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\StoreLogo.png">

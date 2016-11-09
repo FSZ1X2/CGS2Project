@@ -73,11 +73,11 @@ void My3DSceneRenderer::Update(DX::StepTimer const& timer)
 		double totalRotation = timer.GetTotalSeconds() * radiansPerSecond;
 		float radians = static_cast<float>(fmod(totalRotation, XM_2PI));
 
-		//TransModel(0.0f, 0.0f, 0.0f);
-		Rotate(radians);
+		TransModel(0.0f, 0.0f, 0.0f);
+		//Rotate(radians);
 	}
 
-
+	UpdataLight(timer, 1.0f, 0.75f);
 	// Update or move camera here
 	UpdateCamera(timer, 1.0f, 0.75f);
 
@@ -220,6 +220,11 @@ void My3DSceneRenderer::Render(void)
 
 	// Prepare the constant buffer to send it to the graphics device.
 	context->UpdateSubresource1(m_constantBuffer.Get(), 0, NULL, &m_constantBufferData, 0, 0, 0);
+
+	context->UpdateSubresource1(m_lightd.Get(), 0, NULL, &m_dcfd, 0, 0, 0);
+	context->UpdateSubresource1(m_lightp.Get(), 0, NULL, &m_pcfd, 0, 0, 0);
+	context->UpdateSubresource1(m_lights.Get(), 0, NULL, &m_scfd, 0, 0, 0);
+
 	// Each vertex is one instance of the VertexPositionColor struct.
 	UINT stride = sizeof(VertexPositionUVNormal);
 	UINT offset = 0;
@@ -228,27 +233,35 @@ void My3DSceneRenderer::Render(void)
 	context->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	context->IASetInputLayout(m_inputLayout.Get());
+
 	//set texture
 	context->PSSetShaderResources(0, 1, m_catdiff.GetAddressOf());
 	context->PSSetShaderResources(1, 1, m_catnorm.GetAddressOf());
 	context->PSSetShaderResources(2, 1, m_catspec.GetAddressOf());
+
 	// Attach our vertex shader.
 	context->VSSetShader(m_vertexShader.Get(), nullptr, 0);
 	// Send the constant buffer to the graphics device.
 	context->VSSetConstantBuffers1(0, 1, m_constantBuffer.GetAddressOf(), nullptr, nullptr);
 	// Attach our pixel shader.
 	context->PSSetShader(m_pixelShader.Get(), nullptr, 0);
+
+	//set light buffer
+	context->PSSetConstantBuffers(0, 1, m_lightd.GetAddressOf());
+	context->PSSetConstantBuffers(1, 1, m_lightp.GetAddressOf());
+	context->PSSetConstantBuffers(2, 1, m_lights.GetAddressOf());
 	// Draw the objects.
 	context->DrawIndexed(m_indexCount, 0, 0);
 }
 
 void My3DSceneRenderer::CreateDeviceDependentResources(string pathV, string pathP)
 {
+	// Load shaders asynchronously.
 	std::wstring V = std::wstring(pathV.begin(), pathV.end());
 	auto loadVSTask = DX::ReadDataAsync(V);
 	std::wstring P = std::wstring(pathP.begin(), pathP.end());
 	auto loadPSTask = DX::ReadDataAsync(P);
-	// Load shaders asynchronously.
+	
 	//auto loadVSTask = DX::ReadDataAsync(L"SampleVertexShader.cso");
 	//auto loadPSTask = DX::ReadDataAsync(L"SamplePixelShader.cso");
 
@@ -275,12 +288,26 @@ void My3DSceneRenderer::CreateDeviceDependentResources(string pathV, string path
 
 		CD3D11_BUFFER_DESC constantBufferDesc(sizeof(ModelViewProjectionConstantBuffer), D3D11_BIND_CONSTANT_BUFFER);
 		DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&constantBufferDesc, nullptr, &m_constantBuffer));
+
+		//CreateDirectionalLight();
+		CD3D11_BUFFER_DESC constantBufferDescD(sizeof(DirectionalLightConstantBuffer), D3D11_BIND_CONSTANT_BUFFER);
+		DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&constantBufferDescD, nullptr, &m_lightd));
+
+		//CreatePointLight();
+		CD3D11_BUFFER_DESC constantBufferDescP(sizeof(PointLightConstantBuffer), D3D11_BIND_CONSTANT_BUFFER);
+		DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&constantBufferDescP, nullptr, &m_lightp));
+
+		//CreateSpotLight();
+		CD3D11_BUFFER_DESC constantBufferDescS(sizeof(SpotLightConstantBuffer), D3D11_BIND_CONSTANT_BUFFER);
+		DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&constantBufferDescS, nullptr, &m_lights));
 	});
 
 	// Once both shaders are loaded, create the mesh.
 	auto createCubeTask = (createPSTask && createVSTask).then([this]()
 	{
-
+		CreateDirectionalLight();
+		CreatePointLight();
+		CreateSpotLight();
 	});
 
 	// Once the cube is loaded, the object is ready to be rendered.
@@ -299,6 +326,10 @@ void My3DSceneRenderer::ReleaseDeviceDependentResources(void)
 	m_constantBuffer.Reset();
 	m_vertexBuffer.Reset();
 	m_indexBuffer.Reset();
+
+	m_lightd.Reset();
+	m_lightp.Reset();
+	m_lights.Reset();
 }
 
 //My function:
@@ -635,7 +666,7 @@ void My3DSceneRenderer::TransModel(float x, float y, float z)
 
 void My3DSceneRenderer::TranlateModel(float sx, float sy, float sz, float tx, float ty, float tz, DX::StepTimer const& timer, int r)
 {
-	if(r = 0)
+	if(r == 0)
 		XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixTranslation(tx, ty, tz)*XMMatrixScaling(sx, sy, sz)));
 	else
 	{
@@ -669,9 +700,9 @@ void My3DSceneRenderer::Calculatenormal(VertexPositionUVNormal V1, VertexPositio
 	texEdge0.y = tex1.y - tex0.y;
 	texEdge0.z = tex1.z - tex0.z;
 	DirectX::XMFLOAT3 texEdge1;
-	texEdge1.x = tex2.x - tex1.x;
-	texEdge1.y = tex2.y - tex1.y;
-	texEdge1.z = tex2.z - tex1.z;
+	texEdge1.x = tex2.x - tex0.x;
+	texEdge1.y = tex2.y - tex0.y;
+	texEdge1.z = tex2.z - tex0.z;
 
 	float ratio = 1.0f / (texEdge0.x * texEdge1.y - texEdge1.x * texEdge0.y);
 	DirectX::XMFLOAT3 uDirection = DirectX::XMFLOAT3((texEdge1.y * vertEdge0.x - texEdge0.y * vertEdge1.x) * ratio, (texEdge1.y * vertEdge0.y - texEdge0.y * vertEdge1.y) * ratio, (texEdge1.y * vertEdge0.z - texEdge0.y * vertEdge1.z) * ratio);
@@ -705,15 +736,15 @@ void My3DSceneRenderer::Calculatenormal(VertexPositionUVNormal V1, VertexPositio
 	Tangent1.y = Tangent1.y / lenT1;
 	Tangent1.z = Tangent1.z / lenT1;
 
-	Tangent2.x = Tangent2.x / lenT1;
-	Tangent2.y = Tangent2.y / lenT1;
-	Tangent2.z = Tangent2.z / lenT1;
+	Tangent2.x = Tangent2.x / lenT2;
+	Tangent2.y = Tangent2.y / lenT2;
+	Tangent2.z = Tangent2.z / lenT2;
 
-	Tangent3.x = Tangent3.x / lenT1;
-	Tangent3.y = Tangent3.y / lenT1;
-	Tangent3.z = Tangent3.z / lenT1;
+	Tangent3.x = Tangent3.x / lenT3;
+	Tangent3.y = Tangent3.y / lenT3;
+	Tangent3.z = Tangent3.z / lenT3;
 
-	float lenvD = sqrt((uDirection.x * uDirection.x) + (uDirection.y * uDirection.y) + (uDirection.z * uDirection.z));
+	float lenvD = sqrt((vDirection.x * vDirection.x) + (vDirection.y * vDirection.y) + (vDirection.z * vDirection.z));
 	vDirection.x = vDirection.x / lenvD;
 	vDirection.y = vDirection.y / lenvD;
 	vDirection.z = vDirection.z / lenvD;
@@ -733,4 +764,132 @@ void My3DSceneRenderer::Calculatenormal(VertexPositionUVNormal V1, VertexPositio
 	V1.tangent = Tangent1;
 	V2.tangent = Tangent2;
 	V3.tangent = Tangent3;
+}
+
+void My3DSceneRenderer::CreateDirectionalLight()
+{
+	m_dcfd.direction = { 0.0f,5.0f,0.0f,0.0f };
+	m_dcfd.Dcolor = { 1.0f,1.0f,1.0f,1.0f };
+}
+void My3DSceneRenderer::CreatePointLight()
+{
+	m_pcfd.Pointpos = { 0.0f,0.0f,-1.0f,0.0f };
+	m_pcfd.Pcolor = { 0.0f,0.0f,1.0f,0.0f };
+	m_pcfd.lightradius = { 0.5f,0.0f,0.0f,0.0f };
+}
+void My3DSceneRenderer::CreateSpotLight()
+{
+	m_scfd.Spotpos = { -10.0f,0.0f,0.0f,0.0f };
+	m_scfd.Scolor = { 1.0f,0.0f,0.0f,0.0f };
+	m_scfd.conedir = { 0.0f,-5.0f,-5.0f,0.0f };
+	m_scfd.coneratio = { 0.5f,0.0f,0.0f,0.0f };
+}
+
+void My3DSceneRenderer::UpdataLight(DX::StepTimer const& timer, float const moveSpd, float const rotSpd)
+{
+	const float delta_time = (float)timer.GetElapsedSeconds();
+
+	//directional:
+	if (m_kbuttons['I']&& m_kbuttons['1'])
+	{
+		m_dcfd.direction.z += moveSpd * delta_time;
+	}
+	if (m_kbuttons['K'] && m_kbuttons['1'])
+	{
+		m_dcfd.direction.z += -moveSpd * delta_time;
+	}
+	if (m_kbuttons['J'] && m_kbuttons['1'])
+	{
+		m_dcfd.direction.x += -moveSpd * delta_time;
+	}
+	if (m_kbuttons['L'] && m_kbuttons['1'])
+	{
+		m_dcfd.direction.x += moveSpd * delta_time;
+	}
+	if (m_kbuttons['U'] && m_kbuttons['1'])
+	{
+		m_dcfd.direction.y += -moveSpd * delta_time;
+	}
+	if (m_kbuttons['O'] && m_kbuttons['1'])
+	{
+		m_dcfd.direction.y += moveSpd * delta_time;
+	}
+
+	//pointlight
+	if (m_kbuttons['I'] && m_kbuttons['2'])
+	{
+		m_pcfd.Pointpos.z += moveSpd * delta_time;
+	}
+	if (m_kbuttons['K'] && m_kbuttons['2'])
+	{
+		m_pcfd.Pointpos.z += -moveSpd * delta_time;
+	}
+	if (m_kbuttons['J'] && m_kbuttons['2'])
+	{
+		m_pcfd.Pointpos.x += -moveSpd * delta_time;
+	}
+	if (m_kbuttons['L'] && m_kbuttons['2'])
+	{
+		m_pcfd.Pointpos.x += moveSpd * delta_time;
+	}
+	if (m_kbuttons['U'] && m_kbuttons['2'])
+	{
+		m_pcfd.Pointpos.y += -moveSpd * delta_time;
+	}
+	if (m_kbuttons['O'] && m_kbuttons['2'])
+	{
+		m_pcfd.Pointpos.y += moveSpd * delta_time;
+	}
+
+	//Spotlight pos
+	if (m_kbuttons['I'] && m_kbuttons['3'])
+	{
+		m_scfd.Spotpos.z += moveSpd * delta_time;
+	}
+	if (m_kbuttons['K'] && m_kbuttons['3'])
+	{
+		m_scfd.Spotpos.z += -moveSpd * delta_time;
+	}
+	if (m_kbuttons['J'] && m_kbuttons['3'])
+	{
+		m_scfd.Spotpos.x += -moveSpd * delta_time;
+	}
+	if (m_kbuttons['L'] && m_kbuttons['3'])
+	{
+		m_scfd.Spotpos.x += moveSpd * delta_time;
+	}
+	if (m_kbuttons['U'] && m_kbuttons['3'])
+	{
+		m_scfd.Spotpos.y += -moveSpd * delta_time;
+	}
+	if (m_kbuttons['O'] && m_kbuttons['3'])
+	{
+		m_scfd.Spotpos.y += moveSpd * delta_time;
+	}
+
+	//Spotlight dir
+	if (m_kbuttons['I'] && m_kbuttons['4'])
+	{
+		m_scfd.conedir.z += moveSpd * delta_time;
+	}
+	if (m_kbuttons['K'] && m_kbuttons['4'])
+	{
+		m_scfd.conedir.z += -moveSpd * delta_time;
+	}
+	if (m_kbuttons['J'] && m_kbuttons['4'])
+	{
+		m_scfd.conedir.x += -moveSpd * delta_time;
+	}
+	if (m_kbuttons['L'] && m_kbuttons['4'])
+	{
+		m_scfd.conedir.x += moveSpd * delta_time;
+	}
+	if (m_kbuttons['U'] && m_kbuttons['4'])
+	{
+		m_scfd.conedir.y += -moveSpd * delta_time;
+	}
+	if (m_kbuttons['O'] && m_kbuttons['4'])
+	{
+		m_scfd.conedir.y += moveSpd * delta_time;
+	}
 }

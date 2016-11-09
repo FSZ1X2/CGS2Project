@@ -35,6 +35,10 @@ namespace DX11UWA
 		void TransModel(float x, float y, float z);
 		void TranlateModel(float sx, float sy, float sz, float tx, float ty, float tz, DX::StepTimer const& timer, int r);
 		void Calculatenormal(VertexPositionUVNormal V1, VertexPositionUVNormal V2, VertexPositionUVNormal V3);
+		void CreateDirectionalLight();
+		void CreatePointLight();
+		void CreateSpotLight();
+		void UpdataLight(DX::StepTimer const& timer, float const moveSpd, float const rotSpd);
 		//void LoadMesh(const char *path);
 
 	private:
@@ -56,9 +60,18 @@ namespace DX11UWA
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_catnorm;
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_catspec;
 
+		Microsoft::WRL::ComPtr<ID3D11Buffer> m_lightd;
+		Microsoft::WRL::ComPtr<ID3D11Buffer> m_lightp;
+		Microsoft::WRL::ComPtr<ID3D11Buffer> m_lights;
+
 		// System resources for cat geometry.
 		ModelViewProjectionConstantBuffer	m_constantBufferData;
 		uint32	m_indexCount;
+
+		//light
+		DirectionalLightConstantBuffer m_dcfd;
+		PointLightConstantBuffer m_pcfd;
+		SpotLightConstantBuffer m_scfd;
 
 		// Variables used with the rendering loop.
 		bool	m_loadingComplete;

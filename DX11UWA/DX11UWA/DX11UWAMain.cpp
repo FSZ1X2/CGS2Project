@@ -21,7 +21,7 @@ DX11UWAMain::DX11UWAMain(const std::shared_ptr<DX::DeviceResources>& deviceResou
 	m_sceneRenderer = std::unique_ptr<My3DSceneRenderer>(new My3DSceneRenderer(m_deviceResources, "VertexShaderMulti.cso", "PixelShaderNorm.cso"));
 	m_sceneRendererCube = std::unique_ptr<My3DSceneRenderer>(new My3DSceneRenderer(m_deviceResources, "SampleVertexShader.cso", "PixelShaderMultitexture.cso"));
 	m_sceneRendererTree = std::unique_ptr<My3DSceneRenderer>(new My3DSceneRenderer(m_deviceResources, "SampleVertexShader.cso", "SamplePixelShader.cso"));
-	//m_sceneRendererArmchair = std::unique_ptr<My3DSceneRenderer>(new My3DSceneRenderer(m_deviceResources, "VertexShaderMulti.cso", "PixelShaderNorm.cso"));
+	m_sceneRendererArmchair = std::unique_ptr<My3DSceneRenderer>(new My3DSceneRenderer(m_deviceResources, "VertexShaderMulti.cso", "PixelShaderNorm.cso"));
 	m_Skycube = std::unique_ptr<SkyBox>(new SkyBox(m_deviceResources));
 
 	m_fpsTextRenderer = std::unique_ptr<MyFpsTextRenderer>(new MyFpsTextRenderer(m_deviceResources));
@@ -31,7 +31,7 @@ DX11UWAMain::DX11UWAMain(const std::shared_ptr<DX::DeviceResources>& deviceResou
 	m_sceneRenderer->CreateModel("Assets/cat.obj", "Assets/cat_diff.dds", "Assets/cat_norm.dds", "Assets/cat_spec.dds");
 	m_sceneRendererTree->CreateModel("Assets/palmTree.obj", "Assets/palm1.dds","","");
 	m_sceneRendererCube->CreateCube("Assets/Box_Wood07.dds","Assets/Box_Circuit.dds");
-	//m_sceneRendererArmchair->CreateModel("Assets/armchair.obj", "Assets/armchair_d.dds", "Assets/armchair_n.dds", "");
+	m_sceneRendererArmchair->CreateModel("Assets/armchair.obj", "Assets/armchair_d.dds", "Assets/armchair_n.dds", "");
 	//m_timer.SetFixedTimeStep(true);
 	//m_timer.SetTargetElapsedSeconds(1.0 / 60);
 	
@@ -50,7 +50,7 @@ void DX11UWAMain::CreateWindowSizeDependentResources(void)
 	m_sceneRenderer->CreateWindowSizeDependentResources();
 	m_sceneRendererCube->CreateWindowSizeDependentResources();
 	m_sceneRendererTree->CreateWindowSizeDependentResources();
-	//m_sceneRendererArmchair->CreateWindowSizeDependentResources();
+	m_sceneRendererArmchair->CreateWindowSizeDependentResources();
 	m_Skycube->CreateWindowSizeDependentResources();
 }
 
@@ -62,13 +62,16 @@ void DX11UWAMain::Update(void)
 	{
 		// TODO: Replace this with your app's content update functions.
 		m_sceneRenderer->Update(m_timer);
+		m_sceneRenderer->TranlateModel(10.0f, 10.0f, 10.0f, 0.0f, 0.0f, 0.0f, m_timer, 0);
 		m_sceneRenderer->SetInputDeviceData(main_kbuttons, main_currentpos);
 		m_sceneRendererCube->Update(m_timer);
+		m_sceneRendererCube->TranlateModel(10.0f, 10.0f, 10.0f, 0.0f, 0.0f, 0.0f, m_timer, 0);
 		m_sceneRendererCube->SetInputDeviceData(main_kbuttons, main_currentpos);
-		m_sceneRendererTree->Update(m_timer);
-		m_sceneRendererTree->TranlateModel(0.1f, 0.1f, 0.1f, -4.0f, 0.0f, 5.0f, m_timer, 1);
-		m_sceneRendererTree->SetInputDeviceData(main_kbuttons, main_currentpos);
+		//m_sceneRendererTree->Update(m_timer);
+		//m_sceneRendererTree->TranlateModel(0.1f, 0.1f, 0.1f, -4.0f, 0.0f, 5.0f, m_timer, 0);
+		//m_sceneRendererTree->SetInputDeviceData(main_kbuttons, main_currentpos);
 		//m_sceneRendererArmchair->Update(m_timer);
+		//m_sceneRendererArmchair->TranlateModel(1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, m_timer, 1);
 		//m_sceneRendererArmchair->SetInputDeviceData(main_kbuttons, main_currentpos);
 		m_Skycube->Update(m_timer);
 		m_Skycube->SetInputDeviceData(main_kbuttons, main_currentpos);
@@ -104,7 +107,7 @@ bool DX11UWAMain::Render(void)
 	// Render the scene objects.
 	// TODO: Replace this with your app's content rendering functions.
 	m_sceneRenderer->Render();
-	//m_sceneRendererArmchair->Render();
+	m_sceneRendererArmchair->Render();
 	m_sceneRendererTree->Render();
 	m_sceneRendererCube->Render();
 	m_fpsTextRenderer->Render();
@@ -116,7 +119,7 @@ bool DX11UWAMain::Render(void)
 void DX11UWAMain::OnDeviceLost(void)
 {
 	m_sceneRenderer->ReleaseDeviceDependentResources();
-	//m_sceneRendererArmchair->ReleaseDeviceDependentResources();
+	m_sceneRendererArmchair->ReleaseDeviceDependentResources();
 	m_sceneRendererTree->ReleaseDeviceDependentResources();
 	m_sceneRendererCube->ReleaseDeviceDependentResources();
 	m_Skycube->ReleaseDeviceDependentResources();
@@ -127,7 +130,7 @@ void DX11UWAMain::OnDeviceLost(void)
 void DX11UWAMain::OnDeviceRestored(void)
 {
 	m_sceneRenderer->CreateDeviceDependentResources("VertexShaderMulti.cso", "PixelShaderMulti.cso");
-	//m_sceneRendererArmchair->CreateDeviceDependentResources("VertexShaderMulti.cso", "PixelShaderMulti.cso");
+	m_sceneRendererArmchair->CreateDeviceDependentResources("VertexShaderMulti.cso", "PixelShaderMulti.cso");
 	m_sceneRendererTree->CreateDeviceDependentResources("SampleVertexShader.cso", "SamplePixelShader.cso");
 	m_sceneRendererCube->CreateDeviceDependentResources("SampleVertexShader.cso", "PixelShaderMultitexture.cso");
 	m_Skycube->CreateDeviceDependentResources();
