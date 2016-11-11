@@ -36,17 +36,6 @@ texture2D specTexture : register(t2);
 
 SamplerState filters[3] : register(s0);
 
-//static float3 DirectionalLight = { 0.0f,5.0f,0.0f };// : register(l0);
-//static float3 PointLightPosition = { 0.0f,0.0f,-1.0f };// : register(l1);
-//static float3 SpotLightPosition = { 0.0f,1.0f,0.8f };
-//static float3 DLcolor = { 1.0f,1.0f,1.0f };// : register(c0);
-//static float3 PLcolor = { 0.0f,0.0f,1.0f };// : register(c1);
-//static float3 SLcolor = { 1.0f,0.0f,0.0f };
-//static float lightradius = 2.0f;// : register(r0);
-//
-//static float3 conedir = { 0.5f,0.5f,0.5f };
-//static float coneratio = 0.8f;
-
 // A pass-through function for the (interpolated) color data.
 float4 main(PixelShaderInput input) : SV_TARGET
 {

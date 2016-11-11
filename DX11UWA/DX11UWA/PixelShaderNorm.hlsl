@@ -7,6 +7,8 @@ struct PixelShaderInput
 	float4 WorldPos : WORLDPOS;
 	float4 tangent : TANGENT;
 	float4 bitangent : BiTANGENT;
+	//float4 lightViewPosition : TEXCOORD1;
+	//float3 lightPos : TEXCOORD2;
 };
 
 cbuffer DirectionalLightConstantBuffer : register(b0)
@@ -38,23 +40,17 @@ texture2D specTexture : register(t2);
 
 SamplerState filters[3] : register(s0);
 
-//float3 DirectionalLight : register(l0);
-//float3 PointLightPosition  : register(l1);
-//float3 SpotLightPosition : register(l2);
-//static float3 DirectionalLight = { 0.0f,5.0f,0.0f };// : register(l0);
-//static float3 PointLightPosition = { 0.0f,0.0f,-1.0f };// : register(l1);
-//static float3 SpotLightPosition = { 0.0f,1.0f,0.8f };
-//static float3 DLcolor = { 1.0f,1.0f,1.0f };// : register(c0);
-//static float3 PLcolor = { 0.0f,0.0f,1.0f };// : register(c1);
-//static float3 SLcolor = { 1.0f,0.0f,0.0f };
-//static float lightradius = 2.0f;// : register(r0);
-//
-//static float3 conedir = { 0.5f,0.5f,0.5f };
-//static float coneratio = 0.8f;
-
 // A pass-through function for the (interpolated) color data.
 float4 main(PixelShaderInput input) : SV_TARGET
 {
+	//float bias;
+ //   float4 color;
+ //   float2 projectTexCoord;
+ //   float depthValue;
+ //   float lightDepthValue;
+ //   float lightIntensity;
+ //   float4 textureColor;
+
 	float3 nc = normTexture.Sample(filters[1], input.color.xy);
 	float3 newNormal = (nc*2.0f) - 1.0f;
 
@@ -72,8 +68,6 @@ float4 main(PixelShaderInput input) : SV_TARGET
 	float3 lightDirP = normalize(PointLightPosition.xyz - input.WorldPos);
 	float3 LightDirS = normalize(SpotLightPosition.xyz - input.WorldPos);
 
-	//float dotD = clamp(dot(input.normal, DirectionalLight), 0, 1);
-	//float dotP = clamp(dot(input.normal, lightDirP), 0, 1);
 	float dotD = clamp(dot(newNormal, normalize(DirectionalLight.xyz)), 0, 1);
 	float dotP = clamp(dot(newNormal, lightDirP), 0, 1);
 	float dotS = clamp(dot(-LightDirS, normalize(conedir.xyz)), 0, 1);
@@ -91,11 +85,28 @@ float4 main(PixelShaderInput input) : SV_TARGET
 	float3 pcolor2 = pcolor * ATTENUATION;
 	float3 combinecolor = clamp(dcolor + pcolor2 + scolor, 0, 1);
 
+	//bias = 0.001f;
+
+	//projectTexCoord.x = input.lightViewPosition.x / input.lightViewPosition.w / 2.0f + 0.5f;
+	//projectTexCoord.y = -input.lightViewPosition.y / input.lightViewPosition.w / 2.0f + 0.5f;
+	//if ((saturate(projectTexCoord.x) == projectTexCoord.x) && (saturate(projectTexCoord.y) == projectTexCoord.y))
+	//{
+	//	//depthValue = depthMapTexture.Sample(SampleTypeClamp, projectTexCoord).r;
+	//	lightDepthValue = input.lightViewPosition.z / input.lightViewPosition.w;
+	//	lightDepthValue = lightDepthValue - bias;
+	//	if (lightDepthValue < depthValue)
+	//	{
+	//		lightIntensity = saturate(dot(input.normal, input.lightPos));
+
+	//		if (lightIntensity > 0.0f)
+	//		{
+	//			float3 combinecolor = clamp(dcolor + pcolor2 + scolor, 0, 1);
+	//		}
+	//	}
+	//}
 	float3 baseColor;
+
 	float3 dc = diffTexture.Sample(filters[0], input.color.xy);
-	//float3 nc = normTexture.Sample(filters[1], input.color.xy);
-	//float3 sc = specTexture.Sample(filters[2], input.color.xy);
-	//float3 basec = saturate(dc*nc);//dc*0.5*sc*0.5
 	baseColor = dc * combinecolor;
 	float a = (diffTexture.Sample(filters[0], input.color.xy)).a;
 	if (a < 0.5)
