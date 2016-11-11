@@ -18,20 +18,25 @@ DX11UWAMain::DX11UWAMain(const std::shared_ptr<DX::DeviceResources>& deviceResou
 	//m_sceneRenderer = std::unique_ptr<Sample3DSceneRenderer>(new Sample3DSceneRenderer(m_deviceResources));
 	//
 	//m_fpsTextRenderer = std::unique_ptr<SampleFpsTextRenderer>(new SampleFpsTextRenderer(m_deviceResources));
-	m_sceneRenderer = std::unique_ptr<My3DSceneRenderer>(new My3DSceneRenderer(m_deviceResources, "VertexShaderMulti.cso", "PixelShaderNorm.cso"));
-	m_sceneRendererCube = std::unique_ptr<My3DSceneRenderer>(new My3DSceneRenderer(m_deviceResources, "SampleVertexShader.cso", "PixelShaderMultitexture.cso"));
-	m_sceneRendererGround = std::unique_ptr<My3DSceneRenderer>(new My3DSceneRenderer(m_deviceResources, "SampleVertexShader.cso", "PixelShaderMultitexture.cso"));
-	m_sceneRendererTree = std::unique_ptr<My3DSceneRenderer>(new My3DSceneRenderer(m_deviceResources, "SampleVertexShader.cso", "SamplePixelShader.cso"));
+	//m_sceneRenderer = std::unique_ptr<My3DSceneRenderer>(new My3DSceneRenderer(m_deviceResources, "VertexShaderMulti.cso", "PixelShaderNorm.cso"));
+	//m_sceneRendererCube = std::unique_ptr<My3DSceneRenderer>(new My3DSceneRenderer(m_deviceResources, "VertexShaderMulti.cso", "PixelShaderNorm.cso"));
+	//m_sceneRendererGround = std::unique_ptr<My3DSceneRenderer>(new My3DSceneRenderer(m_deviceResources, "SampleVertexShader.cso", "PixelShaderMultitexture.cso"));
+	//m_sceneRendererTree = std::unique_ptr<My3DSceneRenderer>(new My3DSceneRenderer(m_deviceResources, "SampleVertexShader.cso", "SamplePixelShader.cso"));
 	m_Skycube = std::unique_ptr<SkyBox>(new SkyBox(m_deviceResources));
+
+	m_sceneRenderer = std::unique_ptr<My3DSceneRenderer>(new My3DSceneRenderer(m_deviceResources, "VertexShaderMulti.cso", "PixelShaderNorm.cso","Assets/cat.obj", "Assets/cat_diff.dds", "Assets/cat_norm.dds", "Assets/cat_spec.dds", 1, true));
+	m_sceneRendererCube = std::unique_ptr<My3DSceneRenderer>(new My3DSceneRenderer(m_deviceResources, "VertexShaderMulti.cso", "PixelShaderNorm.cso","Assets/Tent_1.obj", "Assets/tent_exterior_d.dds", "Assets/tent_exterior_n.dds", "", 1, true));
+	m_sceneRendererGround = std::unique_ptr<My3DSceneRenderer>(new My3DSceneRenderer(m_deviceResources, "SampleVertexShader.cso", "PixelShaderMultitexture.cso", "","Assets/grass_seamless.dds", "Assets/Box_Circuit.dds", "", 1, false));
+	m_sceneRendererTree = std::unique_ptr<My3DSceneRenderer>(new My3DSceneRenderer(m_deviceResources, "SampleVertexShader.cso", "SamplePixelShader.cso", "Assets/palmTree.obj", "Assets/palm1.dds", "", "", 4,true));
 
 	m_fpsTextRenderer = std::unique_ptr<MyFpsTextRenderer>(new MyFpsTextRenderer(m_deviceResources));
 
 	// TODO: Change the timer settings if you want something other than the default variable timestep mode.
 	// e.g. for 60 FPS fixed timestep update logic, call:
-	m_sceneRenderer->CreateModel("Assets/cat.obj", "Assets/cat_diff.dds", "Assets/cat_norm.dds", "Assets/cat_spec.dds");
-	m_sceneRendererTree->CreateModel("Assets/palmTree.obj", "Assets/palm1.dds","","");
-	m_sceneRendererCube->CreateCube("Assets/Box_Wood07.dds","Assets/Box_Circuit.dds");
-	m_sceneRendererGround->CreateGround("Assets/grass_seamless.dds", "Assets/Box_Circuit.dds");
+	//m_sceneRenderer->CreateModel("Assets/cat.obj", "Assets/cat_diff.dds", "Assets/cat_norm.dds", "Assets/cat_spec.dds",1);
+	//m_sceneRendererTree->CreateModel("Assets/palmTree.obj", "Assets/palm1.dds","","",4);
+	//m_sceneRendererCube->CreateModel("Assets/Tent_1.obj", "Assets/tent_exterior_d.dds", "Assets/tent_exterior_n.dds", "", 1);
+	//m_sceneRendererGround->CreateGround("Assets/grass_seamless.dds", "Assets/Box_Circuit.dds",1);
 	//m_timer.SetFixedTimeStep(true);
 	//m_timer.SetTargetElapsedSeconds(1.0 / 60);
 }
@@ -61,16 +66,19 @@ void DX11UWAMain::Update(void)
 	{
 		// TODO: Replace this with your app's content update functions.
 		m_sceneRenderer->Update(m_timer);
-		m_sceneRenderer->TranlateModel(1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, m_timer, 0);
+		m_sceneRenderer->TranlateModel(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 3.0f, m_timer, 0, 0, 0);
 		m_sceneRenderer->SetInputDeviceData(main_kbuttons, main_currentpos);
-		//m_sceneRendererCube->Update(m_timer);
-		//m_sceneRendererCube->TranlateModel(1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, m_timer, 0);
-		//m_sceneRendererCube->SetInputDeviceData(main_kbuttons, main_currentpos);
+		m_sceneRendererCube->Update(m_timer);
+		m_sceneRendererCube->TranlateModel(0.1f, 0.1f, 0.1f, 0.0f, 0.0f, 15.0f, m_timer, 0, 0, 0);
+		m_sceneRendererCube->SetInputDeviceData(main_kbuttons, main_currentpos);
 		m_sceneRendererGround->Update(m_timer);
-		m_sceneRendererGround->TranlateModel(10.0f, 1.0f, 10.0f, 0.0f, 1.0f, 0.0f, m_timer, 0);
+		m_sceneRendererGround->TranlateModel(10.0f, 1.0f, 10.0f, 0.0f, 1.0f, 0.0f, m_timer, 0, 0, 0);
 		m_sceneRendererGround->SetInputDeviceData(main_kbuttons, main_currentpos);
 		m_sceneRendererTree->Update(m_timer);
-		m_sceneRendererTree->TranlateModel(0.1f, 0.1f, 0.1f, -4.0f, 0.0f, 5.0f, m_timer, 0);
+		m_sceneRendererTree->TranlateModel(0.1f, 0.1f, 0.1f, 12.0f, 0.0f, 7.0f, m_timer, 0, 0,0);
+		m_sceneRendererTree->TranlateModel(0.1f, 0.1f, 0.1f, -10.0f, 0.0f, 9.0f, m_timer, 0, 0,1);
+		m_sceneRendererTree->TranlateModel(0.1f, 0.1f, 0.1f, 15.0f, 0.0f, 5.0f, m_timer, 0, 0,2);
+		m_sceneRendererTree->TranlateModel(0.1f, 0.1f, 0.1f, 10.0f, 0.0f, 2.0f, m_timer, 0, 0,3);
 		m_sceneRendererTree->SetInputDeviceData(main_kbuttons, main_currentpos);
 		m_Skycube->Update(m_timer);
 		m_Skycube->SetInputDeviceData(main_kbuttons, main_currentpos);
@@ -119,7 +127,7 @@ void DX11UWAMain::OnDeviceLost(void)
 {
 	m_sceneRenderer->ReleaseDeviceDependentResources();
 	m_sceneRendererTree->ReleaseDeviceDependentResources();
-	m_sceneRendererCube->ReleaseDeviceDependentResources();
+	//m_sceneRendererCube->ReleaseDeviceDependentResources();
 	m_sceneRendererGround->ReleaseDeviceDependentResources();
 	m_Skycube->ReleaseDeviceDependentResources();
 	m_fpsTextRenderer->ReleaseDeviceDependentResources();
@@ -128,10 +136,15 @@ void DX11UWAMain::OnDeviceLost(void)
 // Notifies renderers that device resources may now be recreated.
 void DX11UWAMain::OnDeviceRestored(void)
 {
-	m_sceneRenderer->CreateDeviceDependentResources("VertexShaderMulti.cso", "PixelShaderNorm.cso");
-	m_sceneRendererTree->CreateDeviceDependentResources("SampleVertexShader.cso", "SamplePixelShader.cso");
-	m_sceneRendererCube->CreateDeviceDependentResources("SampleVertexShader.cso", "PixelShaderMultitexture.cso");
-	m_sceneRendererGround->CreateDeviceDependentResources("SampleVertexShader.cso", "PixelShaderMultitexture.cso");
+	m_sceneRenderer->CreateDeviceDependentResources("VertexShaderMulti.cso", "PixelShaderNorm.cso");//, "Assets/cat.obj", "Assets/cat_diff.dds", "Assets/cat_norm.dds", "Assets/cat_spec.dds", 1, true
+	m_sceneRendererCube->CreateDeviceDependentResources("VertexShaderMulti.cso", "PixelShaderNorm.cso");//, "Assets/Tent_1.obj", "Assets/tent_exterior_d.dds", "Assets/tent_exterior_n.dds", "", 1, true
+	m_sceneRendererGround->CreateDeviceDependentResources("SampleVertexShader.cso", "PixelShaderMultitexture.cso");//, "", "Assets/grass_seamless.dds", "Assets/Box_Circuit.dds", "", 1, false
+	m_sceneRendererTree->CreateDeviceDependentResources("SampleVertexShader.cso", "SamplePixelShader.cso");//, "Assets/palmTree.obj", "Assets/palm1.dds", "", "", 4, true
+
+	//m_sceneRenderer->CreateDeviceDependentResources("VertexShaderMulti.cso", "PixelShaderNorm.cso");
+	//m_sceneRendererTree->CreateDeviceDependentResources("SampleVertexShader.cso", "SamplePixelShader.cso");
+	//m_sceneRendererCube->CreateDeviceDependentResources("VertexShaderMulti.cso", "PixelShaderNorm.cso");
+	//m_sceneRendererGround->CreateDeviceDependentResources("SampleVertexShader.cso", "PixelShaderMultitexture.cso");
 	m_Skycube->CreateDeviceDependentResources();
 	m_fpsTextRenderer->CreateDeviceDependentResources();
 	CreateWindowSizeDependentResources();

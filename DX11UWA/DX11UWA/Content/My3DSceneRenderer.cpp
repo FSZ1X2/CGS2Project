@@ -9,19 +9,25 @@ using namespace DirectX;
 using namespace Windows::Foundation;
 
 // Loads vertex and pixel shaders from files and instantiates the cube geometry.
-My3DSceneRenderer::My3DSceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources, string pathV, string pathP) :
+My3DSceneRenderer::My3DSceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources, string pathV, string pathP, const char *_path,string _path2, string _path3, string _path4, int _n, bool _loadmodel) :
 	m_loadingComplete(false),
 	m_degreesPerSecond(45),
 	m_indexCount(0),
 	m_tracking(false),
 	m_deviceResources(deviceResources)
 {
+	path = _path;
+	path2 = _path2;
+	path3 = _path3;
+	path4 = _path4;
+	n = _n;
+	loadmodel = _loadmodel;
 	memset(m_kbuttons, 0, sizeof(m_kbuttons));
 	m_currMousePos = nullptr;
 	m_prevMousePos = nullptr;
 	memset(&m_camera, 0, sizeof(XMFLOAT4X4));
 
-	CreateDeviceDependentResources(pathV, pathP);
+	CreateDeviceDependentResources(pathV, pathP);//, path, path2, path3, path4, n, loadmodel
 	CreateWindowSizeDependentResources();
 }
 
@@ -54,8 +60,8 @@ void My3DSceneRenderer::CreateWindowSizeDependentResources(void)
 
 	XMStoreFloat4x4(&m_constantBufferData.projection, XMMatrixTranspose(perspectiveMatrix * orientationMatrix));
 
-	// Eye is at (0,0.7,1.5), looking at point (0,-0.1,0) with the up-vector along the y-axis.
-	static const XMVECTORF32 eye = { 0.0f, 0.7f, -1.5f, 0.0f };
+	// Eye is at (0,0.7,-1.5), looking at point (0,-0.1,0) with the up-vector along the y-axis.
+	static const XMVECTORF32 eye = { 1.0f, 0.7f, 2.5f, 0.0f };
 	static const XMVECTORF32 at = { 0.0f, -0.1f, 0.0f, 0.0f };
 	static const XMVECTORF32 up = { 0.0f, 1.0f, 0.0f, 0.0f };
 
@@ -72,8 +78,10 @@ void My3DSceneRenderer::Update(DX::StepTimer const& timer)
 		float radiansPerSecond = XMConvertToRadians(m_degreesPerSecond);
 		double totalRotation = timer.GetTotalSeconds() * radiansPerSecond;
 		float radians = static_cast<float>(fmod(totalRotation, XM_2PI));
-
-		TransModel(0.0f, 0.0f, 0.0f);
+		m_constantBufferData.CameraWorldPos.x = m_camera._41;
+		m_constantBufferData.CameraWorldPos.y = m_camera._42;
+		m_constantBufferData.CameraWorldPos.z = m_camera._43;
+		TransModel(0.0f, 0.0f, 0.0f, 1);
 		//Rotate(radians);
 	}
 
@@ -84,10 +92,10 @@ void My3DSceneRenderer::Update(DX::StepTimer const& timer)
 }
 
 // Rotate the 3D cube model a set amount of radians.
-void My3DSceneRenderer::Rotate(float radians)
+void My3DSceneRenderer::Rotate(float radians, int index)
 {
 	// Prepare to pass the updated model matrix to the shader
-	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixRotationY(radians)));
+	XMStoreFloat4x4(&m_constantBufferData.model[index], XMMatrixTranspose(XMMatrixRotationY(radians)));
 }
 
 void My3DSceneRenderer::UpdateCamera(DX::StepTimer const& timer, float const moveSpd, float const rotSpd)
@@ -196,7 +204,7 @@ void My3DSceneRenderer::TrackingUpdate(float positionX)
 	if (m_tracking)
 	{
 		float radians = XM_2PI * 2.0f * positionX / m_deviceResources->GetOutputSize().Width;
-		Rotate(radians);
+		Rotate(radians, 1);
 	}
 }
 
@@ -251,10 +259,10 @@ void My3DSceneRenderer::Render(void)
 	context->PSSetConstantBuffers(1, 1, m_lightp.GetAddressOf());
 	context->PSSetConstantBuffers(2, 1, m_lights.GetAddressOf());
 	// Draw the objects.
-	context->DrawIndexed(m_indexCount, 0, 0);
+	context->DrawIndexedInstanced(m_indexCount, num, 0, 0, 0);
 }
 
-void My3DSceneRenderer::CreateDeviceDependentResources(string pathV, string pathP)
+void My3DSceneRenderer::CreateDeviceDependentResources(string pathV, string pathP)//, const char *path, string path2, string path3, string path4, int n, bool loadmodel
 {
 	// Load shaders asynchronously.
 	std::wstring V = std::wstring(pathV.begin(), pathV.end());
@@ -303,11 +311,16 @@ void My3DSceneRenderer::CreateDeviceDependentResources(string pathV, string path
 	});
 
 	// Once both shaders are loaded, create the mesh.
-	auto createCubeTask = (createPSTask && createVSTask).then([this]()
+	auto createCubeTask = (createPSTask && createVSTask).then([this]()//const char *path, string path2, string path3, string path4, int n, bool loadmodel
 	{
 		CreateDirectionalLight();
 		CreatePointLight();
 		CreateSpotLight();
+
+		if (loadmodel == true)
+			CreateModel(path, path2, path3, path4, n);
+		else
+			CreateGround(path2, path3, n);
 	});
 
 	// Once the cube is loaded, the object is ready to be rendered.
@@ -315,6 +328,10 @@ void My3DSceneRenderer::CreateDeviceDependentResources(string pathV, string path
 	{
 		m_loadingComplete = true;
 	});
+
+	//m_deviceResources->GetD3DDevice()->CreateTexture2D
+	//m_deviceResources->GetD3DDevice()->CreateDepthStencilView
+	//m_deviceResources->GetD3DDevice()->CreateShaderResourceView
 }
 
 void My3DSceneRenderer::ReleaseDeviceDependentResources(void)
@@ -333,8 +350,9 @@ void My3DSceneRenderer::ReleaseDeviceDependentResources(void)
 }
 
 //My function:
-void My3DSceneRenderer::CreateModel(const char *path, string path2, string path3, string path4)
+void My3DSceneRenderer::CreateModel(const char *path, string path2, string path3, string path4, int n)
 {
+	num = n;
 	std::vector< unsigned int > vertexIndices, uvIndices, normalIndices;
 	std::vector< XMFLOAT3 > temp_vertices;
 	std::vector< XMFLOAT3 > temp_uvs;
@@ -484,99 +502,9 @@ void My3DSceneRenderer::CreateModel(const char *path, string path2, string path3
 	}
 }
 
-/*void My3DSceneRenderer::LoadMesh(const char *path)
+void My3DSceneRenderer::CreateCube(string path2, string path3,int n)
 {
-	// TODO: Load mesh data and send it to the graphics card.
-	std::fstream file;
-
-	file.open(path, std::ios_base::binary | std::ios_base::in);
-
-	std::vector< VertexPositionUVNormal > vertexData;
-	std::vector< unsigned int > indexData;
-	string textureNames;
-
-	if (file.is_open())
-	{
-		unsigned int len;
-		file.read((char *)&len, sizeof(unsigned int));
-		char *meshname;
-		meshname = new char[len];
-		file.read(meshname, len);
-
-		unsigned int tcount;
-		file.read((char *)&tcount, sizeof(unsigned int));
-		char *savetextureNames;
-		for (unsigned int i = 0; i < tcount; i++)
-		{
-			file.read((char *)&len, sizeof(len));
-			savetextureNames = new char[len];
-			file.read(savetextureNames, len);
-			string save1 = savetextureNames;
-			size_t found = save1.find_last_of("/\\");
-			textureNames = save1.substr(found + 1);
-			delete[] savetextureNames;
-		}
-
-		unsigned int vcount;
-		file.read((char *)&vcount, sizeof(unsigned int));
-		for (unsigned int i = 0; i < vcount; i++)
-		{
-			VertexPositionUVNormal data;
-			file.read((char*)&data.pos.x, sizeof(float));
-			file.read((char*)&data.pos.y, sizeof(float));
-			file.read((char*)&data.pos.z, sizeof(float));
-
-			file.read((char*)&data.normal.x, sizeof(float));
-			file.read((char*)&data.normal.y, sizeof(float));
-			file.read((char*)&data.normal.z, sizeof(float));
-
-			file.read((char*)&data.uv.x, sizeof(float));
-			file.read((char*)&data.uv.y, sizeof(float));
-
-			data.pos.x *= 0.02f;
-			data.pos.y *= 0.02f;
-			data.pos.z *= 0.02f;
-
-			data.uv.x = 1 - data.uv.x;
-			data.uv.y = 1 - data.uv.y;
-			data.uv.z = 0.0f;
-
-			vertexData.push_back(data);
-		}
-
-		unsigned int icount;
-		file.read((char *)&icount, sizeof(unsigned int));
-		unsigned int *index;
-		index = new unsigned int[icount * 3];
-		file.read((char*)&index[0], 4 * (icount * 3));
-
-		for (int i = 0; i < icount * 3; i++)
-		{
-			indexData.push_back(index[i]);
-		}
-
-		file.close();
-
-		delete[] meshname;
-		delete[] index;
-	}
-	D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };
-	vertexBufferData.pSysMem = &vertexData[0];
-	vertexBufferData.SysMemPitch = 0;
-	vertexBufferData.SysMemSlicePitch = 0;
-	CD3D11_BUFFER_DESC vertexBufferDesc(vertexData.size() * sizeof(VertexPositionUVNormal), D3D11_BIND_VERTEX_BUFFER);
-	DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&vertexBufferDesc, &vertexBufferData, &m_vertexBuffer));
-
-	D3D11_SUBRESOURCE_DATA indexBufferData = { 0 };
-	indexBufferData.pSysMem = &indexData[0];
-	indexBufferData.SysMemPitch = 0;
-	indexBufferData.SysMemSlicePitch = 0;
-	CD3D11_BUFFER_DESC indexBufferDesc(indexData.size() * sizeof(unsigned int), D3D11_BIND_INDEX_BUFFER);
-	DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&indexBufferDesc, &indexBufferData, &m_indexBuffer));
-}*/
-
-void My3DSceneRenderer::CreateCube(string path2, string path3)
-{
+	num = n;
 	static const VertexPositionUVNormal cubeVertices[] =
 	{
 		{ XMFLOAT3(-0.5f, -1.0f, -0.1f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(-1,0,0) },
@@ -654,26 +582,28 @@ void My3DSceneRenderer::CreateCube(string path2, string path3)
 	}
 }
 
-void My3DSceneRenderer::ScaleModel(float x, float y, float z)
+void My3DSceneRenderer::ScaleModel(float x, float y, float z, int index)
 {
-	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixScaling(x, y, z)));
+	XMStoreFloat4x4(&m_constantBufferData.model[index], XMMatrixTranspose(XMMatrixScaling(x, y, z)));
 }
 
-void My3DSceneRenderer::TransModel(float x, float y, float z)
+void My3DSceneRenderer::TransModel(float x, float y, float z, int index)
 {
-	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixTranslation(x, y, z)));
+	XMStoreFloat4x4(&m_constantBufferData.model[index], XMMatrixTranspose(XMMatrixTranslation(x, y, z)));
 }
 
-void My3DSceneRenderer::TranlateModel(float sx, float sy, float sz, float tx, float ty, float tz, DX::StepTimer const& timer, int r)
+void My3DSceneRenderer::TranlateModel(float sx, float sy, float sz, float tx, float ty, float tz, DX::StepTimer const& timer,float degree, int r, int index)
 {
-	if(r == 0)
-		XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixTranslation(tx, ty, tz)*XMMatrixScaling(sx, sy, sz)));
+	if (r == 0)
+		XMStoreFloat4x4(&m_constantBufferData.model[index], XMMatrixTranspose(XMMatrixTranslation(tx, ty, tz)*XMMatrixScaling(sx, sy, sz)));
+	else if (r = 2)
+		XMStoreFloat4x4(&m_constantBufferData.model[index], XMMatrixTranspose(XMMatrixTranslation(tx, ty, tz)*XMMatrixScaling(sx, sy, sz)*XMMatrixRotationY(degree)));
 	else
 	{
 		float radiansPerSecond = XMConvertToRadians(m_degreesPerSecond);
 		double totalRotation = timer.GetTotalSeconds() * radiansPerSecond;
 		float radians = static_cast<float>(fmod(totalRotation, XM_2PI));
-		XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixTranslation(tx, ty, tz)*XMMatrixScaling(sx, sy, sz)*XMMatrixRotationY(radians)));
+		XMStoreFloat4x4(&m_constantBufferData.model[index], XMMatrixTranspose(XMMatrixTranslation(tx, ty, tz)*XMMatrixScaling(sx, sy, sz)*XMMatrixRotationY(radians)));
 	}
 }
 
@@ -908,8 +838,9 @@ void My3DSceneRenderer::UpdataLight(DX::StepTimer const& timer, float const move
 	}
 }
 
-void My3DSceneRenderer::CreateGround(string path2, string path3)
+void My3DSceneRenderer::CreateGround(string path2, string path3, int n)
 {
+	num = n;
 	static const VertexPositionUVNormal cubeVertices[] =
 	{
 		{ XMFLOAT3(-0.5f, -1.0f, -0.1f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0,1,0) },

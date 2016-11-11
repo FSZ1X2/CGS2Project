@@ -12,8 +12,8 @@ namespace DX11UWA
 	class My3DSceneRenderer
 	{
 	public:
-		My3DSceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources, string pathV, string pathP);
-		void CreateDeviceDependentResources(string pathV, string pathP);
+		My3DSceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources, string pathV, string pathP, const char *path, string path2, string path3, string path4, int n, bool loadmodel);
+		void CreateDeviceDependentResources(string pathV, string pathP);//, const char *path, string path2, string path3, string path4, int n, bool loadmodel
 		void CreateWindowSizeDependentResources(void);
 		void ReleaseDeviceDependentResources(void);
 		void Update(DX::StepTimer const& timer);
@@ -29,12 +29,12 @@ namespace DX11UWA
 		void SetInputDeviceData(const char* kb, const Windows::UI::Input::PointerPoint^ pos);
 
 		//My function:
-		void CreateCube(string path2, string path3);
-		void CreateGround(string path2, string path3);
-		void CreateModel(const char *path, string path2, string path3, string path4);
-		void ScaleModel(float x, float y, float z);
-		void TransModel(float x, float y, float z);
-		void TranlateModel(float sx, float sy, float sz, float tx, float ty, float tz, DX::StepTimer const& timer, int r);
+		void CreateCube(string path2, string path3,int n);
+		void CreateGround(string path2, string path3,int n);
+		void CreateModel(const char *path, string path2, string path3, string path4, int n);
+		void ScaleModel(float x, float y, float z,int index);
+		void TransModel(float x, float y, float z, int index);
+		void TranlateModel(float sx, float sy, float sz, float tx, float ty, float tz, DX::StepTimer const& timer, float degree, int r, int index);
 		void Calculatenormal(VertexPositionUVNormal V1, VertexPositionUVNormal V2, VertexPositionUVNormal V3);
 		void CreateDirectionalLight();
 		void CreatePointLight();
@@ -43,7 +43,7 @@ namespace DX11UWA
 		//void LoadMesh(const char *path);
 
 	private:
-		void Rotate(float radians);
+		void Rotate(float radians, int index);
 		void UpdateCamera(DX::StepTimer const& timer, float const moveSpd, float const rotSpd);
 
 	private:
@@ -86,7 +86,15 @@ namespace DX11UWA
 
 		// Matrix data member for the camera
 		DirectX::XMFLOAT4X4 m_camera;
+		int num;
 
+
+		const char *path;
+		string path2;
+		string path3;
+		string path4;
+		int n;
+		bool loadmodel;
 	};
 }
 

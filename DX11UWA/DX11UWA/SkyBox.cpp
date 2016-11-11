@@ -74,7 +74,7 @@ void SkyBox::Update(DX::StepTimer const& timer)
 		double totalRotation = timer.GetTotalSeconds() * radiansPerSecond;
 		float radians = static_cast<float>(fmod(totalRotation, XM_2PI));
 		XMFLOAT3 CameraPos = { m_camera._41,m_camera._42,m_camera._43 };
-		XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixTranslation(CameraPos.x, CameraPos.y, CameraPos.z)));
+		XMStoreFloat4x4(&m_constantBufferData.model[0], XMMatrixTranspose(XMMatrixTranslation(CameraPos.x, CameraPos.y, CameraPos.z)));
 		//Rotate(radians);
 	}
 
@@ -86,7 +86,7 @@ void SkyBox::Update(DX::StepTimer const& timer)
 void SkyBox::Rotate(float radians)
 {
 	// Prepare to pass the updated model matrix to the shader
-	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixRotationY(radians)));
+	XMStoreFloat4x4(&m_constantBufferData.model[0], XMMatrixTranspose(XMMatrixRotationY(radians)));
 }
 
 void SkyBox::UpdateCamera(DX::StepTimer const& timer, float const moveSpd, float const rotSpd)

@@ -42,9 +42,6 @@
     <ClCompile Include="Common\DeviceResources.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="Content\Sample3DSceneRenderer.cpp">
-      <Filter>Content</Filter>
-    </ClCompile>
     <ClCompile Include="Content\SampleFpsTextRenderer.cpp">
       <Filter>Content</Filter>
     </ClCompile>
@@ -73,9 +70,6 @@
     </ClInclude>
     <ClInclude Include="Common\StepTimer.h">
       <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Content\Sample3DSceneRenderer.h">
-      <Filter>Content</Filter>
     </ClInclude>
     <ClInclude Include="Content\SampleFpsTextRenderer.h">
       <Filter>Content</Filter>
@@ -125,6 +119,12 @@
     <Image Include="Assets\grass_seamless.dds">
       <Filter>Assets</Filter>
     </Image>
+    <Image Include="Assets\tent_exterior_d.dds">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\tent_exterior_n.dds">
+      <Filter>Assets</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />
@@ -135,6 +135,9 @@
       <Filter>Assets</Filter>
     </None>
     <None Include="Assets\palmTree.obj">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="Assets\Tent_1.obj">
       <Filter>Assets</Filter>
     </None>
   </ItemGroup>
