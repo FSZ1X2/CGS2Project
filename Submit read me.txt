@@ -13,3 +13,7 @@ Update 11.15
 --for requirement 6 Geometry Instancing: the tree is an example of instancing
 
 --for requirement 68 Transparent Blending: I made three cube to show this
+
+--for requirement 40 specular light: Only the trees have specular light (per-pixel)
+
+--for requirement 56 multithreading: My create function is located at My3DSceneRenderer and called CreateDeviceDependentResources
