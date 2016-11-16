@@ -85,10 +85,10 @@ void DX11UWAMain::Update(void)
 		m_sceneRendererTree->SetInputDeviceData(main_kbuttons, main_currentpos);
 
 		m_sceneRendererTC->Update(m_timer);
-		m_sceneRendererTC->SwapCube(9.0f);
-		m_sceneRendererTC->TranlateModel(1.0f, 1.0f, 1.0f, 5.0f, 1.0f, 5.0f, m_timer, 0, 0, m_sceneRendererTC->cubeindex[0]);
-		m_sceneRendererTC->TranlateModel(1.0f, 1.0f, 1.0f, 5.0f, 1.0f, 7.0f, m_timer, 0, 0, m_sceneRendererTC->cubeindex[1]);
-		m_sceneRendererTC->TranlateModel(1.0f, 1.0f, 1.0f, 5.0f, 1.0f, 9.0f, m_timer, 0, 0, m_sceneRendererTC->cubeindex[2]);
+		m_sceneRendererTC->SwapCube(6.0f);
+		m_sceneRendererTC->TranlateModel(1.0f, 1.0f, 1.0f, 2.0f, 1.0f, 2.0f, m_timer, 0, 0, m_sceneRendererTC->cubeindex[0]);
+		m_sceneRendererTC->TranlateModel(1.0f, 1.0f, 1.0f, 2.0f, 1.0f, 4.0f, m_timer, 0, 0, m_sceneRendererTC->cubeindex[1]);
+		m_sceneRendererTC->TranlateModel(1.0f, 1.0f, 1.0f, 2.0f, 1.0f, 6.0f, m_timer, 0, 0, m_sceneRendererTC->cubeindex[2]);
 		m_sceneRendererTC->SetInputDeviceData(main_kbuttons, main_currentpos);
 
 		m_Skycube->Update(m_timer);

@@ -425,7 +425,7 @@ void DX::DeviceResources::CreateWindowSizeDependentResources()
 		m_d3dRenderTargetSize.Height
 	);
 
-	m_d3dContext->RSSetViewports(2, &m_screenViewport2);
+	m_d3dContext->RSSetViewports(1, &m_screenViewport2);
 
 	// Create a Direct2D target bitmap associated with the
 	// swap chain back buffer and set it as the current target.
