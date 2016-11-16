@@ -58,6 +58,9 @@ SamplerState filters[3] : register(s0);
 //float3 SpecularColor = { 0.0f,0.5f,0.5f };
 //float SpecularPower = 2.0f;
 
+float SPECULARINTENSITY = 0.5f;
+float SPECULARPOWER = 1.0f;
+
 // A pass-through function for the (interpolated) color data.
 float4 main(PixelShaderInput input) : SV_TARGET
 {
@@ -80,13 +83,13 @@ float4 main(PixelShaderInput input) : SV_TARGET
 	float spotfactor = (dotS > coneratio.x) ? 1 : 0;
 	spotfactor *= clamp(dot(LightDirS, normalize(input.normal)), 0, 1);
 
-	float3 viewdir = normalize(CamWorldPos.xyz – input.WorldPos.xyz);
-	float3 halfvectorD = normalize((-normalize(DirectionalLight.xyz)) + viewdir);
-	float3 halfvectorP = normalize((-lightDirP) + viewdir);
-	float3 halfvectorS = normalize((-LightDirS) + viewdir);
-	float intensityD = max(clamps(dot(normalize(input.normal), normalize(halfvectorD)), 0, 1) ^ SPECULARPOWER, 0);
-	float intensityP = max(clamps(dot(normalize(input.normal), normalize(halfvectorP)), 0, 1) ^ SPECULARPOWER, 0);
-	float intensityS = max(clamps(dot(normalize(input.normal), normalize(halfvectorS)), 0, 1) ^ SPECULARPOWER, 0);
+	//float3 viewdir = normalize(input.CamWorldPos.xyz - input.WorldPos.xyz);
+	//float3 halfvectorD = normalize((-normalize(DirectionalLight.xyz)) + viewdir);
+	//float3 halfvectorP = normalize((-lightDirP) + viewdir);
+	//float3 halfvectorS = normalize((-LightDirS) + viewdir);
+	//float intensityD = max(pow(clamp(dot(normalize(input.normal), normalize(halfvectorD)), 0, 1), SPECULARPOWER), 0);
+	//float intensityP = max(pow(clamp(dot(normalize(input.normal), normalize(halfvectorP)), 0, 1), SPECULARPOWER), 0);
+	//float intensityS = max(pow(clamp(dot(normalize(input.normal), normalize(halfvectorS)), 0, 1), SPECULARPOWER), 0);
 
 	float3 dcolor = DLcolor.xyz *clamp((dotD + 0.2f), 0, 1);
 	float3 pcolor = PLcolor.xyz *dotP;
@@ -96,12 +99,12 @@ float4 main(PixelShaderInput input) : SV_TARGET
 
 	float3 pcolor2 = pcolor * ATTENUATION;
 
-	float3 resultD = dcolor * SPECULARINTENSITY * intensityD;
-	float3 resultP = pcolor2 * SPECULARINTENSITY * intensityP;
-	float3 resultS = scolor * SPECULARINTENSITY * intensityS;
+	//float3 resultD = dcolor * SPECULARINTENSITY * intensityD;
+	//float3 resultP = pcolor2 * SPECULARINTENSITY * intensityP;
+	//float3 resultS = scolor * SPECULARINTENSITY * intensityS;
+
 	//bias = 0.001f;
 	//combinecolor = ( 0.0f,0.0f,0.0f );
-
 	//projectTexCoord.x = input.lightViewPosition.x / input.lightViewPosition.w / 2.0f + 0.5f;
 	//projectTexCoord.y = -input.lightViewPosition.y / input.lightViewPosition.w / 2.0f + 0.5f;
 	//if ((saturate(projectTexCoord.x) == projectTexCoord.x) && (saturate(projectTexCoord.y) == projectTexCoord.y))
@@ -114,33 +117,26 @@ float4 main(PixelShaderInput input) : SV_TARGET
 	//		lightIntensityD = saturate(dot(input.normal, normalize(input.pos - input.WorldPos)));
 	//		lightIntensityP = saturate(dot(input.normal, normalize(input.pos - input.WorldPos)));
 	//		lightIntensityS = saturate(dot(input.normal, normalize(input.pos - input.WorldPos)));
-
 	//		if (lightIntensityD > 0.0f)
 	//		{
 	//			combinecolor += dcolor * lightIntensityD;
 	//		}
-
 	//		if (lightIntensityP > 0.0f)
 	//		{
 	//			combinecolor += pcolor2 * lightIntensityP; 
 	//		}
-
 	//		if (lightIntensityS > 0.0f)
 	//		{
 	//			combinecolor += scolor * lightIntensitys;
 	//		}
-
 	//		combinecolor = saturate(combinecolor);
 	//	}
 	//}
-
 	//float3 lightDirP = normalize(PointLightPosition.xyz - input.WorldPos.xyz);
 	//float3 LightDirS = normalize(SpotLightPosition.xyz - input.WorldPos.xyz);
-
 	//float dotD = clamp(dot(input.normal, normalize(DirectionalLight.xyz)), 0, 1);
 	//float dotP = clamp(dot(input.normal, lightDirP), 0, 1);
 	//float dotS = clamp(dot(-LightDirS, normalize(conedir.xyz)), 0, 1);
-
 	//float spotfactor = (dotS > coneratio.x) ? 1 : 0;
 	//spotfactor *= clamp(dot(LightDirS, normalize(input.normal)), 0, 1);
 	//
@@ -151,6 +147,8 @@ float4 main(PixelShaderInput input) : SV_TARGET
 	//float ATTENUATION = 1.0 - clamp((lightDirP / lightradius.x), 0, 1);
 	//
 	//float3 pcolor2 = pcolor * ATTENUATION;
+
+	//float3 combinecolor = clamp(resultD + resultP + resultS, 0, 1);
 	float3 combinecolor = clamp(dcolor + pcolor2 + scolor, 0, 1);
 	
 	float3 baseColor = diffTexture.Sample(filters[0], input.color.xy) *combinecolor;

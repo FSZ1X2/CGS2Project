@@ -125,6 +125,9 @@
     <Image Include="Assets\tent_exterior_n.dds">
       <Filter>Assets</Filter>
     </Image>
+    <Image Include="Assets\cube.dds">
+      <Filter>Assets</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />
@@ -155,6 +158,9 @@
       <Filter>Content</Filter>
     </FxCompile>
     <FxCompile Include="PixelShaderNorm.hlsl">
+      <Filter>Content</Filter>
+    </FxCompile>
+    <FxCompile Include="CubePixel.hlsl">
       <Filter>Content</Filter>
     </FxCompile>
   </ItemGroup>

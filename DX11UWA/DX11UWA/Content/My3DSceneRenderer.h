@@ -12,7 +12,7 @@ namespace DX11UWA
 	class My3DSceneRenderer
 	{
 	public:
-		My3DSceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources, string pathV, string pathP, const char *path, string path2, string path3, string path4, int n, bool loadmodel);
+		My3DSceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources, string pathV, string pathP, const char *path, string path2, string path3, string path4, int n, int loadmodel);
 		void CreateDeviceDependentResources(string pathV, string pathP);//, const char *path, string path2, string path3, string path4, int n, bool loadmodel
 		void CreateWindowSizeDependentResources(void);
 		void ReleaseDeviceDependentResources(void);
@@ -41,7 +41,8 @@ namespace DX11UWA
 		void CreateSpotLight();
 		void UpdataLight(DX::StepTimer const& timer, float const moveSpd, float const rotSpd);
 		//void LoadMesh(const char *path);
-
+		void SwapCube(float z);
+		int cubeindex[3];
 	private:
 		void Rotate(float radians, int index);
 		void UpdateCamera(DX::StepTimer const& timer, float const moveSpd, float const rotSpd);
@@ -65,8 +66,11 @@ namespace DX11UWA
 		Microsoft::WRL::ComPtr<ID3D11Buffer> m_lightp;
 		Microsoft::WRL::ComPtr<ID3D11Buffer> m_lights;
 
+		Microsoft::WRL::ComPtr<ID3D11BlendState> m_blend;
+
 		// System resources for cat geometry.
 		ModelViewProjectionConstantBuffer	m_constantBufferData;
+		ModelViewProjectionConstantBuffer	m_constantBufferData2;
 		uint32	m_indexCount;
 
 		//light
@@ -86,6 +90,7 @@ namespace DX11UWA
 
 		// Matrix data member for the camera
 		DirectX::XMFLOAT4X4 m_camera;
+		DirectX::XMFLOAT4X4 m_camera2;
 		int num;
 
 
@@ -94,7 +99,7 @@ namespace DX11UWA
 		string path3;
 		string path4;
 		int n;
-		bool loadmodel;
+		int loadmodel;
 	};
 }
 

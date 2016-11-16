@@ -43,9 +43,9 @@ PixelShaderInput main(VertexShaderInput input, uint index: SV_InstanceID)
 	output.pos = pos;
 
 	//Calculate the position of the vertice as viewed by the light source.
-	output.lightViewPosition = mul(pos, model[index]);
-	output.lightViewPosition = mul(output.lightViewPosition, lightViewMatrix);
-	output.lightViewPosition = mul(output.lightViewPosition, lightProjectionMatrix);
+	//output.lightViewPosition = mul(pos, model[index]);
+	//output.lightViewPosition = mul(output.lightViewPosition, lightViewMatrix);
+	//output.lightViewPosition = mul(output.lightViewPosition, lightProjectionMatrix);
 
 	// Pass the color through without modification.
 	output.color = input.color;

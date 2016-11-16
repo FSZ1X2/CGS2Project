@@ -48,6 +48,8 @@ namespace DX11UWA
 		Microsoft::WRL::ComPtr<ID3D11Buffer>		m_constantBuffer;
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_sky;
 
+		DirectX::XMFLOAT4X4 m_camera2;
+
 		// System resources for geometry.
 		ModelViewProjectionConstantBuffer	m_constantBufferData;
 		uint32	m_indexCount;

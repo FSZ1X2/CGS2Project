@@ -9,7 +9,7 @@ using namespace DirectX;
 using namespace Windows::Foundation;
 
 // Loads vertex and pixel shaders from files and instantiates the cube geometry.
-My3DSceneRenderer::My3DSceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources, string pathV, string pathP, const char *_path,string _path2, string _path3, string _path4, int _n, bool _loadmodel) :
+My3DSceneRenderer::My3DSceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources, string pathV, string pathP, const char *_path,string _path2, string _path3, string _path4, int _n, int _loadmodel) :
 	m_loadingComplete(false),
 	m_degreesPerSecond(45),
 	m_indexCount(0),
@@ -26,6 +26,7 @@ My3DSceneRenderer::My3DSceneRenderer(const std::shared_ptr<DX::DeviceResources>&
 	m_currMousePos = nullptr;
 	m_prevMousePos = nullptr;
 	memset(&m_camera, 0, sizeof(XMFLOAT4X4));
+	memset(&m_camera2, 0, sizeof(XMFLOAT4X4));
 
 	CreateDeviceDependentResources(pathV, pathP);//, path, path2, path3, path4, n, loadmodel
 	CreateWindowSizeDependentResources();
@@ -53,20 +54,29 @@ void My3DSceneRenderer::CreateWindowSizeDependentResources(void)
 
 	// This sample makes use of a right-handed coordinate system using row-major matrices.
 	XMMATRIX perspectiveMatrix = XMMatrixPerspectiveFovLH(fovAngleY, aspectRatio, 0.01f, 100.0f);
-
 	XMFLOAT4X4 orientation = m_deviceResources->GetOrientationTransform3D();
-
 	XMMATRIX orientationMatrix = XMLoadFloat4x4(&orientation);
-
 	XMStoreFloat4x4(&m_constantBufferData.projection, XMMatrixTranspose(perspectiveMatrix * orientationMatrix));
 
-	// Eye is at (0,0.7,-1.5), looking at point (0,-0.1,0) with the up-vector along the y-axis.
-	static const XMVECTORF32 eye = { 1.0f, 0.7f, 2.5f, 0.0f };
-	static const XMVECTORF32 at = { 0.0f, -0.1f, 0.0f, 0.0f };
-	static const XMVECTORF32 up = { 0.0f, 1.0f, 0.0f, 0.0f };
+	//secondVP:
+	XMMATRIX perspectiveMatrix2 = XMMatrixPerspectiveFovLH(fovAngleY, aspectRatio, 0.01f, 100.0f);
+	XMFLOAT4X4 orientation2 = m_deviceResources->GetOrientationTransform3D();
+	XMMATRIX orientationMatrix2 = XMLoadFloat4x4(&orientation2);
+	XMStoreFloat4x4(&m_constantBufferData2.projection, XMMatrixTranspose(perspectiveMatrix2 * orientationMatrix2));
 
-	XMStoreFloat4x4(&m_camera, XMMatrixInverse(nullptr, XMMatrixLookAtLH(eye, at, up)));
-	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtLH(eye, at, up)));
+	// Eye is at (0,0.7,-1.5), looking at point (0,-0.1,0) with the up-vector along the y-axis.
+	//static const XMVECTORF32 eye = { 1.0f, 0.7f, 2.5f, 0.0f };
+	//static const XMVECTORF32 at = { 0.0f, -0.1f, 0.0f, 0.0f };
+	//static const XMVECTORF32 up = { 0.0f, 1.0f, 0.0f, 0.0f };
+	//XMStoreFloat4x4(&m_camera, XMMatrixInverse(nullptr, XMMatrixLookAtLH(eye, at, up)));
+	//XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtLH(eye, at, up)));
+
+	//secondVP:
+	static const XMVECTORF32 eye2 = { 0.0f, 0.7f, -1.5f, 0.0f };
+	static const XMVECTORF32 at2 = { 0.0f, -0.1f, 0.0f, 0.0f };
+	static const XMVECTORF32 up2 = { 0.0f, 1.0f, 0.0f, 0.0f };
+	XMStoreFloat4x4(&m_camera2, XMMatrixInverse(nullptr, XMMatrixLookAtLH(eye2, at2, up2)));
+	//XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtLH(eye2, at2, up2)));
 }
 
 // Called once per frame, rotates the cube and calculates the model and view matrices.
@@ -225,6 +235,7 @@ void My3DSceneRenderer::Render(void)
 	auto context = m_deviceResources->GetD3DDeviceContext();
 
 	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixInverse(nullptr, XMLoadFloat4x4(&m_camera))));
+	//XMStoreFloat4x4(&m_constantBufferData2.view, XMMatrixTranspose(XMMatrixInverse(nullptr, XMLoadFloat4x4(&m_camera2))));
 
 	// Prepare the constant buffer to send it to the graphics device.
 	context->UpdateSubresource1(m_constantBuffer.Get(), 0, NULL, &m_constantBufferData, 0, 0, 0);
@@ -259,6 +270,12 @@ void My3DSceneRenderer::Render(void)
 	context->PSSetConstantBuffers(1, 1, m_lightp.GetAddressOf());
 	context->PSSetConstantBuffers(2, 1, m_lights.GetAddressOf());
 	// Draw the objects.
+	context->OMSetBlendState(m_blend.Get(), 0, 0xffffffff);
+	context->DrawIndexedInstanced(m_indexCount, num, 0, 0, 0);
+
+	auto VP2 = m_deviceResources->GetScreenViewport2();
+	context->RSSetViewports(1, &VP2);
+	context->UpdateSubresource1(m_constantBuffer.Get(), 0, NULL, &m_constantBufferData, 0, 0, 0);
 	context->DrawIndexedInstanced(m_indexCount, num, 0, 0, 0);
 }
 
@@ -317,10 +334,12 @@ void My3DSceneRenderer::CreateDeviceDependentResources(string pathV, string path
 		CreatePointLight();
 		CreateSpotLight();
 
-		if (loadmodel == true)
+		if (loadmodel == 0)
 			CreateModel(path, path2, path3, path4, n);
-		else
+		else if (loadmodel == 1)
 			CreateGround(path2, path3, n);
+		else
+			CreateCube(path2, path3, n);
 	});
 
 	// Once the cube is loaded, the object is ready to be rendered.
@@ -505,6 +524,10 @@ void My3DSceneRenderer::CreateModel(const char *path, string path2, string path3
 void My3DSceneRenderer::CreateCube(string path2, string path3,int n)
 {
 	num = n;
+	cubeindex[0] = 0;
+	cubeindex[1] = 1;
+	cubeindex[2] = 2;
+
 	static const VertexPositionUVNormal cubeVertices[] =
 	{
 		{ XMFLOAT3(-0.5f, -1.0f, -0.1f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(-1,0,0) },
@@ -554,6 +577,19 @@ void My3DSceneRenderer::CreateCube(string path2, string path3,int n)
 		12,13,15, //+y
 		12,15,14,
 	};
+
+	D3D11_BLEND_DESC blendDesc = { 0 };
+	blendDesc.AlphaToCoverageEnable = false;
+	blendDesc.IndependentBlendEnable = false;
+	blendDesc.RenderTarget[0].BlendEnable = TRUE;
+	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	m_deviceResources->GetD3DDevice()->CreateBlendState(&blendDesc, &m_blend);
 
 	m_indexCount = ARRAYSIZE(cubeIndices);
 
@@ -886,5 +922,21 @@ void My3DSceneRenderer::CreateGround(string path2, string path3, int n)
 		const wchar_t* p2 = temp2.c_str();
 		HRESULT hr2 = CreateDDSTextureFromFile(m_deviceResources->GetD3DDevice(), p2, NULL, m_catnorm.GetAddressOf());
 		DX::ThrowIfFailed(hr2);
+	}
+}
+
+void My3DSceneRenderer::SwapCube(float z)
+{
+	if (m_camera._43 < z)
+	{
+		cubeindex[0] = 2;
+		cubeindex[1] = 1;
+		cubeindex[2] = 0;
+	}
+	else
+	{
+		cubeindex[0] = 0;
+		cubeindex[1] = 1;
+		cubeindex[2] = 2;
 	}
 }

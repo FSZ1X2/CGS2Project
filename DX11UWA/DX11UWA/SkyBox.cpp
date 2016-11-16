@@ -20,6 +20,7 @@ SkyBox::SkyBox(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
 	m_currMousePos = nullptr;
 	m_prevMousePos = nullptr;
 	memset(&m_camera, 0, sizeof(XMFLOAT4X4));
+	memset(&m_camera2, 0, sizeof(XMFLOAT4X4));
 
 	CreateDeviceDependentResources();
 	CreateWindowSizeDependentResources();
@@ -61,6 +62,11 @@ void SkyBox::CreateWindowSizeDependentResources(void)
 
 	XMStoreFloat4x4(&m_camera, XMMatrixInverse(nullptr, XMMatrixLookAtLH(eye, at, up)));
 	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtLH(eye, at, up)));
+
+	static const XMVECTORF32 eye2 = { 0.0f, 0.7f, -1.5f, 0.0f };
+	static const XMVECTORF32 at2 = { 0.0f, -0.1f, 0.0f, 0.0f };
+	static const XMVECTORF32 up2 = { 0.0f, 1.0f, 0.0f, 0.0f };
+	XMStoreFloat4x4(&m_camera2, XMMatrixInverse(nullptr, XMMatrixLookAtLH(eye2, at2, up2)));
 }
 
 // Called once per frame, rotates the cube and calculates the model and view matrices.
@@ -235,6 +241,11 @@ void SkyBox::Render(void)
 	// Attach our pixel shader.
 	context->PSSetShader(m_pixelShader.Get(), nullptr, 0);
 	// Draw the objects.
+	context->DrawIndexed(m_indexCount, 0, 0);
+
+	auto VP2 = m_deviceResources->GetScreenViewport2();
+	context->RSSetViewports(1, &VP2);
+	context->UpdateSubresource1(m_constantBuffer.Get(), 0, NULL, &m_constantBufferData, 0, 0, 0);
 	context->DrawIndexed(m_indexCount, 0, 0);
 }
 
