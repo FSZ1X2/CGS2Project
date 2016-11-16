@@ -55,6 +55,11 @@ void SkyBox::CreateWindowSizeDependentResources(void)
 
 	XMStoreFloat4x4(&m_constantBufferData.projection, XMMatrixTranspose(perspectiveMatrix * orientationMatrix));
 
+	XMMATRIX perspectiveMatrix2 = XMMatrixPerspectiveFovLH(fovAngleY, aspectRatio / 2, 0.01f, 100.0f);
+	XMFLOAT4X4 orientation2 = m_deviceResources->GetOrientationTransform3D();
+	XMMATRIX orientationMatrix2 = XMLoadFloat4x4(&orientation2);
+	XMStoreFloat4x4(&m_constantBufferData2.projection, XMMatrixTranspose(perspectiveMatrix2 * orientationMatrix2));
+
 	// Eye is at (0,0.7,1.5), looking at point (0,-0.1,0) with the up-vector along the y-axis.
 	static const XMVECTORF32 eye = { 0.0f, 0.7f, -1.5f, 0.0f };
 	static const XMVECTORF32 at = { 0.0f, -0.1f, 0.0f, 0.0f };
@@ -67,6 +72,7 @@ void SkyBox::CreateWindowSizeDependentResources(void)
 	static const XMVECTORF32 at2 = { 0.0f, -0.1f, 0.0f, 0.0f };
 	static const XMVECTORF32 up2 = { 0.0f, 1.0f, 0.0f, 0.0f };
 	XMStoreFloat4x4(&m_camera2, XMMatrixInverse(nullptr, XMMatrixLookAtLH(eye2, at2, up2)));
+	XMStoreFloat4x4(&m_constantBufferData2.view, XMMatrixTranspose(XMMatrixLookAtLH(eye2, at2, up2)));
 }
 
 // Called once per frame, rotates the cube and calculates the model and view matrices.
@@ -81,6 +87,8 @@ void SkyBox::Update(DX::StepTimer const& timer)
 		float radians = static_cast<float>(fmod(totalRotation, XM_2PI));
 		XMFLOAT3 CameraPos = { m_camera._41,m_camera._42,m_camera._43 };
 		XMStoreFloat4x4(&m_constantBufferData.model[0], XMMatrixTranspose(XMMatrixTranslation(CameraPos.x, CameraPos.y, CameraPos.z)));
+		XMFLOAT3 CameraPos2 = { m_camera2._41,m_camera2._42,m_camera2._43 };
+		XMStoreFloat4x4(&m_constantBufferData2.model[0], XMMatrixTranspose(XMMatrixTranslation(CameraPos2.x, CameraPos2.y, CameraPos2.z)));
 		//Rotate(radians);
 	}
 
@@ -245,7 +253,8 @@ void SkyBox::Render(void)
 
 	auto VP2 = m_deviceResources->GetScreenViewport2();
 	context->RSSetViewports(1, &VP2);
-	context->UpdateSubresource1(m_constantBuffer.Get(), 0, NULL, &m_constantBufferData, 0, 0, 0);
+	context->UpdateSubresource1(m_constantBuffer2.Get(), 0, NULL, &m_constantBufferData2, 0, 0, 0);
+	context->VSSetConstantBuffers1(0, 1, m_constantBuffer2.GetAddressOf(), nullptr, nullptr);
 	context->DrawIndexed(m_indexCount, 0, 0);
 }
 
@@ -277,6 +286,9 @@ void SkyBox::CreateDeviceDependentResources(void)
 
 		CD3D11_BUFFER_DESC constantBufferDesc(sizeof(ModelViewProjectionConstantBuffer), D3D11_BIND_CONSTANT_BUFFER);
 		DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&constantBufferDesc, nullptr, &m_constantBuffer));
+
+		CD3D11_BUFFER_DESC constantBufferDesc2(sizeof(ModelViewProjectionConstantBuffer), D3D11_BIND_CONSTANT_BUFFER);
+		DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&constantBufferDesc2, nullptr, &m_constantBuffer2));
 	});
 
 	// Once both shaders are loaded, create the mesh.

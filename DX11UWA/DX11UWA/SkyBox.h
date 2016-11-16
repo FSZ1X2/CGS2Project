@@ -46,12 +46,12 @@ namespace DX11UWA
 		Microsoft::WRL::ComPtr<ID3D11VertexShader>	m_vertexShader;
 		Microsoft::WRL::ComPtr<ID3D11PixelShader>	m_pixelShader;
 		Microsoft::WRL::ComPtr<ID3D11Buffer>		m_constantBuffer;
+		Microsoft::WRL::ComPtr<ID3D11Buffer>		m_constantBuffer2;
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_sky;
-
-		DirectX::XMFLOAT4X4 m_camera2;
 
 		// System resources for geometry.
 		ModelViewProjectionConstantBuffer	m_constantBufferData;
+		ModelViewProjectionConstantBuffer	m_constantBufferData2;
 		uint32	m_indexCount;
 
 		// Variables used with the rendering loop.
@@ -66,6 +66,7 @@ namespace DX11UWA
 
 		// Matrix data member for the camera
 		DirectX::XMFLOAT4X4 m_camera;
+		DirectX::XMFLOAT4X4 m_camera2;
 
 	};
 }

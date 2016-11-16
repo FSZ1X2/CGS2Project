@@ -36,7 +36,7 @@ My3DSceneRenderer::My3DSceneRenderer(const std::shared_ptr<DX::DeviceResources>&
 void My3DSceneRenderer::CreateWindowSizeDependentResources(void)
 {
 	Size outputSize = m_deviceResources->GetOutputSize();
-	float aspectRatio = outputSize.Width / outputSize.Height;
+	float aspectRatio = outputSize.Width / (outputSize.Height/2);
 	float fovAngleY = 70.0f * XM_PI / 180.0f;
 
 	// This is a simple example of change that can be made when the app is in
@@ -59,24 +59,24 @@ void My3DSceneRenderer::CreateWindowSizeDependentResources(void)
 	XMStoreFloat4x4(&m_constantBufferData.projection, XMMatrixTranspose(perspectiveMatrix * orientationMatrix));
 
 	//secondVP:
-	XMMATRIX perspectiveMatrix2 = XMMatrixPerspectiveFovLH(fovAngleY, aspectRatio, 0.01f, 100.0f);
+	XMMATRIX perspectiveMatrix2 = XMMatrixPerspectiveFovLH(fovAngleY, aspectRatio/2, 0.01f, 100.0f);
 	XMFLOAT4X4 orientation2 = m_deviceResources->GetOrientationTransform3D();
 	XMMATRIX orientationMatrix2 = XMLoadFloat4x4(&orientation2);
 	XMStoreFloat4x4(&m_constantBufferData2.projection, XMMatrixTranspose(perspectiveMatrix2 * orientationMatrix2));
 
 	// Eye is at (0,0.7,-1.5), looking at point (0,-0.1,0) with the up-vector along the y-axis.
-	//static const XMVECTORF32 eye = { 1.0f, 0.7f, 2.5f, 0.0f };
-	//static const XMVECTORF32 at = { 0.0f, -0.1f, 0.0f, 0.0f };
-	//static const XMVECTORF32 up = { 0.0f, 1.0f, 0.0f, 0.0f };
-	//XMStoreFloat4x4(&m_camera, XMMatrixInverse(nullptr, XMMatrixLookAtLH(eye, at, up)));
-	//XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtLH(eye, at, up)));
+	static const XMVECTORF32 eye = { 1.0f, 0.7f, 2.5f, 0.0f };
+	static const XMVECTORF32 at = { 0.0f, -0.1f, 0.0f, 0.0f };
+	static const XMVECTORF32 up = { 0.0f, 1.0f, 0.0f, 0.0f };
+	XMStoreFloat4x4(&m_camera, XMMatrixInverse(nullptr, XMMatrixLookAtLH(eye, at, up)));
+	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtLH(eye, at, up)));
 
 	//secondVP:
-	static const XMVECTORF32 eye2 = { 0.0f, 0.7f, -1.5f, 0.0f };
-	static const XMVECTORF32 at2 = { 0.0f, -0.1f, 0.0f, 0.0f };
+	static const XMVECTORF32 eye2 = { 0.0f, 0.7f, 5.0f, 0.0f };
+	static const XMVECTORF32 at2 = { 0.0f, -0.5f, -0.1f, 0.0f };
 	static const XMVECTORF32 up2 = { 0.0f, 1.0f, 0.0f, 0.0f };
 	XMStoreFloat4x4(&m_camera2, XMMatrixInverse(nullptr, XMMatrixLookAtLH(eye2, at2, up2)));
-	//XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtLH(eye2, at2, up2)));
+	XMStoreFloat4x4(&m_constantBufferData2.view, XMMatrixTranspose(XMMatrixLookAtLH(eye2, at2, up2)));
 }
 
 // Called once per frame, rotates the cube and calculates the model and view matrices.
@@ -88,10 +88,17 @@ void My3DSceneRenderer::Update(DX::StepTimer const& timer)
 		float radiansPerSecond = XMConvertToRadians(m_degreesPerSecond);
 		double totalRotation = timer.GetTotalSeconds() * radiansPerSecond;
 		float radians = static_cast<float>(fmod(totalRotation, XM_2PI));
+		
 		m_constantBufferData.CameraWorldPos.x = m_camera._41;
 		m_constantBufferData.CameraWorldPos.y = m_camera._42;
 		m_constantBufferData.CameraWorldPos.z = m_camera._43;
+
+		m_constantBufferData2.CameraWorldPos.x = m_camera2._41;
+		m_constantBufferData2.CameraWorldPos.y = m_camera2._42;
+		m_constantBufferData2.CameraWorldPos.z = m_camera2._43;
+
 		TransModel(0.0f, 0.0f, 0.0f, 1);
+		TransModel2(0.0f, 0.0f, 0.0f, 1);
 		//Rotate(radians);
 	}
 
@@ -235,7 +242,7 @@ void My3DSceneRenderer::Render(void)
 	auto context = m_deviceResources->GetD3DDeviceContext();
 
 	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixInverse(nullptr, XMLoadFloat4x4(&m_camera))));
-	//XMStoreFloat4x4(&m_constantBufferData2.view, XMMatrixTranspose(XMMatrixInverse(nullptr, XMLoadFloat4x4(&m_camera2))));
+	XMStoreFloat4x4(&m_constantBufferData2.view, XMMatrixTranspose(XMMatrixInverse(nullptr, XMLoadFloat4x4(&m_camera2))));
 
 	// Prepare the constant buffer to send it to the graphics device.
 	context->UpdateSubresource1(m_constantBuffer.Get(), 0, NULL, &m_constantBufferData, 0, 0, 0);
@@ -275,7 +282,8 @@ void My3DSceneRenderer::Render(void)
 
 	auto VP2 = m_deviceResources->GetScreenViewport2();
 	context->RSSetViewports(1, &VP2);
-	context->UpdateSubresource1(m_constantBuffer.Get(), 0, NULL, &m_constantBufferData, 0, 0, 0);
+	context->UpdateSubresource1(m_constantBuffer2.Get(), 0, NULL, &m_constantBufferData2, 0, 0, 0);
+	context->VSSetConstantBuffers1(0, 1, m_constantBuffer2.GetAddressOf(), nullptr, nullptr);
 	context->DrawIndexedInstanced(m_indexCount, num, 0, 0, 0);
 }
 
@@ -313,6 +321,9 @@ void My3DSceneRenderer::CreateDeviceDependentResources(string pathV, string path
 
 		CD3D11_BUFFER_DESC constantBufferDesc(sizeof(ModelViewProjectionConstantBuffer), D3D11_BIND_CONSTANT_BUFFER);
 		DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&constantBufferDesc, nullptr, &m_constantBuffer));
+
+		CD3D11_BUFFER_DESC constantBufferDesc2(sizeof(ModelViewProjectionConstantBuffer), D3D11_BIND_CONSTANT_BUFFER);
+		DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&constantBufferDesc2, nullptr, &m_constantBuffer2));
 
 		//CreateDirectionalLight();
 		CD3D11_BUFFER_DESC constantBufferDescD(sizeof(DirectionalLightConstantBuffer), D3D11_BIND_CONSTANT_BUFFER);
@@ -621,25 +632,39 @@ void My3DSceneRenderer::CreateCube(string path2, string path3,int n)
 void My3DSceneRenderer::ScaleModel(float x, float y, float z, int index)
 {
 	XMStoreFloat4x4(&m_constantBufferData.model[index], XMMatrixTranspose(XMMatrixScaling(x, y, z)));
+	XMStoreFloat4x4(&m_constantBufferData2.model[index], XMMatrixTranspose(XMMatrixScaling(x, y, z)));
 }
 
 void My3DSceneRenderer::TransModel(float x, float y, float z, int index)
 {
 	XMStoreFloat4x4(&m_constantBufferData.model[index], XMMatrixTranspose(XMMatrixTranslation(x, y, z)));
+	//XMStoreFloat4x4(&m_constantBufferData2.model[index], XMMatrixTranspose(XMMatrixTranslation(x, y, z)));
+}
+
+void My3DSceneRenderer::TransModel2(float x, float y, float z, int index)
+{
+	XMStoreFloat4x4(&m_constantBufferData2.model[index], XMMatrixTranspose(XMMatrixTranslation(x, y, z)));
 }
 
 void My3DSceneRenderer::TranlateModel(float sx, float sy, float sz, float tx, float ty, float tz, DX::StepTimer const& timer,float degree, int r, int index)
 {
 	if (r == 0)
+	{
 		XMStoreFloat4x4(&m_constantBufferData.model[index], XMMatrixTranspose(XMMatrixTranslation(tx, ty, tz)*XMMatrixScaling(sx, sy, sz)));
+		XMStoreFloat4x4(&m_constantBufferData2.model[index], XMMatrixTranspose(XMMatrixTranslation(tx, ty, tz)*XMMatrixScaling(sx, sy, sz)));
+	}
 	else if (r = 2)
+	{
 		XMStoreFloat4x4(&m_constantBufferData.model[index], XMMatrixTranspose(XMMatrixTranslation(tx, ty, tz)*XMMatrixScaling(sx, sy, sz)*XMMatrixRotationY(degree)));
+		XMStoreFloat4x4(&m_constantBufferData2.model[index], XMMatrixTranspose(XMMatrixTranslation(tx, ty, tz)*XMMatrixScaling(sx, sy, sz)*XMMatrixRotationY(degree)));
+	}
 	else
 	{
 		float radiansPerSecond = XMConvertToRadians(m_degreesPerSecond);
 		double totalRotation = timer.GetTotalSeconds() * radiansPerSecond;
 		float radians = static_cast<float>(fmod(totalRotation, XM_2PI));
 		XMStoreFloat4x4(&m_constantBufferData.model[index], XMMatrixTranspose(XMMatrixTranslation(tx, ty, tz)*XMMatrixScaling(sx, sy, sz)*XMMatrixRotationY(radians)));
+		XMStoreFloat4x4(&m_constantBufferData2.model[index], XMMatrixTranspose(XMMatrixTranslation(tx, ty, tz)*XMMatrixScaling(sx, sy, sz)*XMMatrixRotationY(radians)));
 	}
 }
 

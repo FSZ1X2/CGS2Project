@@ -34,6 +34,7 @@ namespace DX11UWA
 		void CreateModel(const char *path, string path2, string path3, string path4, int n);
 		void ScaleModel(float x, float y, float z,int index);
 		void TransModel(float x, float y, float z, int index);
+		void TransModel2(float x, float y, float z, int index);
 		void TranlateModel(float sx, float sy, float sz, float tx, float ty, float tz, DX::StepTimer const& timer, float degree, int r, int index);
 		void Calculatenormal(VertexPositionUVNormal V1, VertexPositionUVNormal V2, VertexPositionUVNormal V3);
 		void CreateDirectionalLight();
@@ -58,6 +59,7 @@ namespace DX11UWA
 		Microsoft::WRL::ComPtr<ID3D11VertexShader>	m_vertexShader;
 		Microsoft::WRL::ComPtr<ID3D11PixelShader>	m_pixelShader;
 		Microsoft::WRL::ComPtr<ID3D11Buffer>		m_constantBuffer;
+		Microsoft::WRL::ComPtr<ID3D11Buffer>		m_constantBuffer2;
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_catdiff;
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_catnorm;
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_catspec;
